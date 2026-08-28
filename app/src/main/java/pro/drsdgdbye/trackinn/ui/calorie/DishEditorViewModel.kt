@@ -1,8 +1,9 @@
 package pro.drsdgdbye.trackinn.ui.calorie
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -11,13 +12,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import pro.drsdgdbye.trackinn.data.db.TrackinnDatabase
 import pro.drsdgdbye.trackinn.data.db.entity.CompositeDishEntity
 import pro.drsdgdbye.trackinn.data.db.entity.CompositeDishIngredientEntity
 import pro.drsdgdbye.trackinn.data.db.entity.ProductEntity
+import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.CompositeDishRepository
 import pro.drsdgdbye.trackinn.data.repository.NutrientCalculation
 import pro.drsdgdbye.trackinn.data.repository.Nutrients
@@ -39,9 +39,10 @@ private data class DishSnapshot(
 )
 
 @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-class DishEditorViewModel(application: Application) : AndroidViewModel(application) {
-    private val dishRepository: CompositeDishRepository
+class DishEditorViewModel(
+    private val dishRepository: CompositeDishRepository,
     private val productRepository: ProductRepository
+) : ViewModel() {
 
     val dishName = MutableStateFlow("")
     val dishType = MutableStateFlow("MAIN")
@@ -108,9 +109,6 @@ class DishEditorViewModel(application: Application) : AndroidViewModel(applicati
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Nutrients(0, 0, 0, 0))
 
     init {
-        val db = TrackinnDatabase.getInstance(application)
-        dishRepository = CompositeDishRepository(db.compositeDishDao())
-        productRepository = ProductRepository(db.productDao())
         loadAllProducts()
     }
 
@@ -287,6 +285,15 @@ class DishEditorViewModel(application: Application) : AndroidViewModel(applicati
             val dish = dishRepository.getById(dishId) ?: return@launch
             dishRepository.delete(dish)
             onSuccess()
+        }
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                val container = appContainer()
+                DishEditorViewModel(container.compositeDishRepository, container.productRepository)
+            }
         }
     }
 }

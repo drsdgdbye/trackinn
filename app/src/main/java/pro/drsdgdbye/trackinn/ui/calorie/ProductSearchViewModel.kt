@@ -1,21 +1,21 @@
 package pro.drsdgdbye.trackinn.ui.calorie
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import pro.drsdgdbye.trackinn.data.db.TrackinnDatabase
 import pro.drsdgdbye.trackinn.data.db.entity.ProductEntity
+import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.ProductRepository
 
 @OptIn(FlowPreview::class)
-class ProductSearchViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: ProductRepository
+class ProductSearchViewModel(private val repository: ProductRepository) : ViewModel() {
     private val searchQuery = MutableStateFlow("")
 
     val searchResults = searchQuery
@@ -24,11 +24,6 @@ class ProductSearchViewModel(application: Application) : AndroidViewModel(applic
             if (query.isBlank()) flowOf(emptyList())
             else repository.search(query)
         }
-
-    init {
-        val db = TrackinnDatabase.getInstance(application)
-        repository = ProductRepository(db.productDao())
-    }
 
     fun setSearchQuery(query: String) {
         searchQuery.value = query
@@ -58,5 +53,13 @@ class ProductSearchViewModel(application: Application) : AndroidViewModel(applic
             )
         }
         return id
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                ProductSearchViewModel(appContainer().productRepository)
+            }
+        }
     }
 }

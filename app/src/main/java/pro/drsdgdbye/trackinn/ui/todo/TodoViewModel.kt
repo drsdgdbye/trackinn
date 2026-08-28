@@ -1,25 +1,20 @@
 package pro.drsdgdbye.trackinn.ui.todo
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import pro.drsdgdbye.trackinn.data.db.TrackinnDatabase
 import pro.drsdgdbye.trackinn.data.db.entity.TaskEntity
+import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.TaskRepository
 
-class TodoViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: TaskRepository
+class TodoViewModel(private val repository: TaskRepository) : ViewModel() {
 
-    val tasks: MutableStateFlow<List<TaskEntity>>
+    val tasks: MutableStateFlow<List<TaskEntity>> = MutableStateFlow(emptyList())
 
     init {
-        val db = TrackinnDatabase.getInstance(application)
-        repository = TaskRepository(db.taskDao())
-        tasks = MutableStateFlow(emptyList())
         viewModelScope.launch {
             repository.getAll().collect { tasks.value = it }
         }
@@ -46,5 +41,13 @@ class TodoViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updatePositions(taskList: List<TaskEntity>) {
         viewModelScope.launch { repository.updatePositions(taskList) }
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                TodoViewModel(appContainer().taskRepository)
+            }
+        }
     }
 }

@@ -22,7 +22,6 @@ import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import pro.drsdgdbye.trackinn.data.settings.SettingsRepository
 import pro.drsdgdbye.trackinn.data.settings.ThemeMode
 import pro.drsdgdbye.trackinn.ui.theme.TrackinnTheme
 import java.util.Locale
@@ -45,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Применяем сохранённую локаль для системных API (Locale.getDefault, форматы дат)
-        val settingsRepository = SettingsRepository(applicationContext)
+        val settingsRepository = (application as TrackinnApp).container.settingsRepository
         val lang = runBlocking { settingsRepository.language.first() }
         val localeList = if (lang != null) LocaleListCompat.forLanguageTags(lang) else LocaleListCompat.getEmptyLocaleList()
         AppCompatDelegate.setApplicationLocales(localeList)
@@ -82,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 LocalActivityResultRegistryOwner provides this@MainActivity
             ) {
                 TrackinnTheme(darkTheme = darkTheme) {
-                    TrackinnApp()
+                    TrackinnRoot()
                 }
             }
         }

@@ -1,8 +1,9 @@
 package pro.drsdgdbye.trackinn.ui.calorie
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,13 +14,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import pro.drsdgdbye.trackinn.data.db.TrackinnDatabase
 import pro.drsdgdbye.trackinn.data.db.entity.CompositeDishEntity
+import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.CompositeDishRepository
 
 @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-class DishListViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: CompositeDishRepository
+class DishListViewModel(private val repository: CompositeDishRepository) : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     private val _selectedType = MutableStateFlow<String?>(null)
 
@@ -39,11 +39,6 @@ class DishListViewModel(application: Application) : AndroidViewModel(application
         else allDishes.filter { it.dishType == type }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    init {
-        val db = TrackinnDatabase.getInstance(application)
-        repository = CompositeDishRepository(db.compositeDishDao())
-    }
-
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
     }
@@ -55,6 +50,14 @@ class DishListViewModel(application: Application) : AndroidViewModel(application
     fun deleteDish(dish: CompositeDishEntity) {
         viewModelScope.launch {
             repository.delete(dish)
+        }
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                DishListViewModel(appContainer().compositeDishRepository)
+            }
         }
     }
 }

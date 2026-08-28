@@ -1,8 +1,9 @@
 package pro.drsdgdbye.trackinn.ui.calorie
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,10 +13,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import pro.drsdgdbye.trackinn.data.db.TrackinnDatabase
 import pro.drsdgdbye.trackinn.data.db.entity.CompositeDishEntity
 import pro.drsdgdbye.trackinn.data.db.entity.MealItemEntity
 import pro.drsdgdbye.trackinn.data.db.entity.ProductEntity
+import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.CompositeDishRepository
 import pro.drsdgdbye.trackinn.data.repository.MealRepository
 import pro.drsdgdbye.trackinn.data.repository.NutrientCalculation
@@ -27,10 +28,11 @@ sealed class SearchResult {
 }
 
 @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-class AddMealViewModel(application: Application) : AndroidViewModel(application) {
-    private val productRepository: ProductRepository
-    private val dishRepository: CompositeDishRepository
+class AddMealViewModel(
+    private val productRepository: ProductRepository,
+    private val dishRepository: CompositeDishRepository,
     private val mealRepository: MealRepository
+) : ViewModel() {
 
     private val searchQuery = MutableStateFlow("")
 
@@ -47,13 +49,6 @@ class AddMealViewModel(application: Application) : AndroidViewModel(application)
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    init {
-        val db = TrackinnDatabase.getInstance(application)
-        productRepository = ProductRepository(db.productDao())
-        dishRepository = CompositeDishRepository(db.compositeDishDao())
-        mealRepository = MealRepository(db.mealDao())
-    }
 
     fun setSearchQuery(query: String) {
         searchQuery.value = query
@@ -136,6 +131,19 @@ class AddMealViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
             onDone()
+        }
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                val container = appContainer()
+                AddMealViewModel(
+                    container.productRepository,
+                    container.compositeDishRepository,
+                    container.mealRepository
+                )
+            }
         }
     }
 }
