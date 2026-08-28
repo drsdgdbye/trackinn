@@ -35,29 +35,6 @@ The app provides a palette of 20 Material Design colors that can be assigned to 
 | Charts | Vico |
 | Annotation processing | KSP |
 
-## Building and running
-
-### From Android Studio
-
-1. Open the project in Android Studio
-2. Select a device or emulator
-3. Click **Run** (or press Shift+F10)
-
-### From command line
-
-```bash
-# Build debug APK
-./gradlew assembleDebug
-
-# Install on connected device
-./gradlew installDebug
-
-# Or build and install in one step
-./gradlew installDebug
-```
-
-The APK will be generated at `app/build/outputs/apk/debug/app-debug.apk`.
-
 ## License
 
 This project is licensed under the [Do What The Fuck You Want To Public License (WTFPL)](https://www.wtfpl.net/).
