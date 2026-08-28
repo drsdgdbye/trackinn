@@ -53,16 +53,16 @@ fun TimerEditorScreen(
     var totalMinutes by remember { mutableStateOf("") }
     var prepSeconds by remember { mutableStateOf("") }
     var checkpoints by remember { mutableStateOf("") }
-    var startSound by remember { mutableStateOf("plink") }
-    var endSound by remember { mutableStateOf("bell") }
-    var checkpointSound by remember { mutableStateOf("chime") }
+    var startSound by remember { mutableStateOf("meditation_start") }
+    var endSound by remember { mutableStateOf("meditation_end") }
+    var checkpointSound by remember { mutableStateOf("meditation_checkpoint") }
     var timerProgressColor by remember { mutableStateOf("#4CAF50") }
     var checkpointPassedColor by remember { mutableStateOf("#4CAF50") }
     var checkpointPendingColor by remember { mutableStateOf("#9E9E9E") }
     var isLoaded by remember { mutableStateOf(false) }
     val isNew = timerId == -1L
 
-    val sounds = listOf("plink", "bell", "chime", "gong", "drop")
+    val sounds = listOf("meditation_start", "meditation_end", "meditation_checkpoint")
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -80,9 +80,9 @@ fun TimerEditorScreen(
                     totalMinutes = timer.totalMinutes.toString()
                     prepSeconds = timer.prepSeconds.toString()
                     checkpoints = timer.checkpointMinutes
-                    startSound = timer.startSound ?: "plink"
-                    endSound = timer.endSound ?: "bell"
-                    checkpointSound = timer.checkpointSound ?: "chime"
+                    startSound = timer.startSound ?: "meditation_start"
+                    endSound = timer.endSound ?: "meditation_end"
+                    checkpointSound = timer.checkpointSound ?: "meditation_checkpoint"
                     timerProgressColor = timer.timerProgressColor
                     checkpointPassedColor = timer.checkpointPassedColor
                     checkpointPendingColor = timer.checkpointPendingColor

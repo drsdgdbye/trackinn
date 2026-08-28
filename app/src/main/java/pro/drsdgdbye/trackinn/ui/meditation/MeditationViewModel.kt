@@ -74,9 +74,8 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
 
     private var timerJob: Job? = null
     private var soundPool: SoundPool? = null
-    private var startSoundId: Int = 0
-    private var endSoundId: Int = 0
-    private var checkpointSoundId: Int = 0
+    private var soundMap = mutableMapOf<String, Int>()
+    private var soundsLoaded = false
     private var sessionStartTime: Long = 0L
 
     init {
@@ -222,9 +221,18 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
     private fun initSounds() {
         val app = getApplication<Application>()
         soundPool = SoundPool.Builder().setMaxStreams(3).build()
-        startSoundId = soundPool!!.load(app, R.raw.meditation_start, 1)
-        endSoundId = soundPool!!.load(app, R.raw.meditation_end, 1)
-        checkpointSoundId = soundPool!!.load(app, R.raw.meditation_checkpoint, 1)
+        soundPool?.setOnLoadCompleteListener { _, _, _ ->
+            soundsLoaded = true
+        }
+        soundMap["meditation_start"] = soundPool!!.load(app, R.raw.meditation_start, 1)
+        soundMap["meditation_end"] = soundPool!!.load(app, R.raw.meditation_end, 1)
+        soundMap["meditation_checkpoint"] = soundPool!!.load(app, R.raw.meditation_checkpoint, 1)
+    }
+
+    private fun playSound(soundName: String?) {
+        if (!soundsLoaded) return
+        val id = soundMap[soundName] ?: soundMap["meditation_start"] ?: return
+        soundPool?.play(id, 1f, 1f, 1, 0, 1f)
     }
 
     fun startTimerById(id: Long) {
@@ -252,7 +260,7 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
                     delay(1000)
                 }
             }
-            soundPool?.play(startSoundId, 1f, 1f, 1, 0, 1f)
+            playSound(timer.startSound)
             val totalSeconds = timer.totalMinutes * 60
             val checkpoints = timer.checkpointMinutes
                 .split(",")
@@ -276,13 +284,13 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
                 _uiState.value = _uiState.value.copy(remainingSeconds = i)
                 val elapsedMinutes = (totalSeconds - i) / 60
                 if (checkpointIdx < checkpoints.size && elapsedMinutes >= checkpoints[checkpointIdx]) {
-                    soundPool?.play(checkpointSoundId, 1f, 1f, 1, 0, 1f)
+                    playSound(timer.checkpointSound)
                     _uiState.value = _uiState.value.copy(currentCheckpointIndex = checkpointIdx)
                     checkpointIdx++
                 }
                 delay(1000)
             }
-            soundPool?.play(endSoundId, 1f, 1f, 1, 0, 1f)
+            playSound(timer.endSound)
             _uiState.value = _uiState.value.copy(state = TimerState.COMPLETED)
             saveSession(completed = true)
         }
