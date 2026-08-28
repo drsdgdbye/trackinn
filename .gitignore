@@ -16,3 +16,4 @@ local.properties
 
 .opencode/adb-mcp-venv/
 openspec/
+opencode.json
