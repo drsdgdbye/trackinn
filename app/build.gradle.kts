@@ -82,6 +82,9 @@ dependencies {
     // Reorderable for drag-and-drop
     implementation(libs.sh.calvin.reorderable)
 
+    // Vico charts
+    implementation(libs.vico.compose.m3)
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

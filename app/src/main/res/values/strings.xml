@@ -189,4 +189,17 @@
     <string name="completed">Выполнено</string>
     <string name="interrupted">Прервано</string>
     <string name="no_sessions">Нет сессий</string>
+
+    <!-- Stats Dashboard -->
+    <string name="stat_total_sessions">Всего сессий</string>
+    <string name="stat_total_time">Суммарное время</string>
+    <string name="stat_streak">Серия</string>
+    <string name="stat_completion">Выполнение</string>
+    <string name="stat_streak_days">%d дн</string>
+    <string name="stat_percent">%d%%</string>
+    <string name="stat_hours">%1$d ч %2$d мин</string>
+    <string name="stat_minutes">%d мин</string>
+    <string name="tab_week">Неделя</string>
+    <string name="tab_month">Месяц</string>
+    <string name="tab_year">Год</string>
 </resources>

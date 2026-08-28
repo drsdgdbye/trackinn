@@ -16,7 +16,7 @@ Track meals across four categories: breakfast, lunch, snack, dinner. The app mai
 
 ### Meditation timer
 
-A configurable meditation timer with a circular progress ring and checkpoint markers. Timers support a preparation countdown, multiple checkpoints with separate sounds, and five built-in sounds (plink, bell, chime, gong, drop). Sessions are recorded to a local history with completion status and can be filtered by date range.
+A configurable meditation timer with a circular progress ring and checkpoint markers. Timers support a preparation countdown, multiple checkpoints with separate sounds, and five built-in sounds (plink, bell, chime, gong, drop). Sessions are recorded to a local history with completion status and can be filtered by date range. The history screen includes a dashboard with key metrics (total sessions, time, streak, completion rate), a weekly bar chart, and a GitHub-style heatmap calendar showing meditation intensity.
 
 ### Settings and customization
 
@@ -32,7 +32,31 @@ The app provides a palette of 20 Material Design colors that can be assigned to 
 | Preferences | DataStore |
 | Navigation | Navigation Compose |
 | Drag-and-drop | sh.calvin.reorderable |
+| Charts | Vico |
 | Annotation processing | KSP |
+
+## Building and running
+
+### From Android Studio
+
+1. Open the project in Android Studio
+2. Select a device or emulator
+3. Click **Run** (or press Shift+F10)
+
+### From command line
+
+```bash
+# Build debug APK
+./gradlew assembleDebug
+
+# Install on connected device
+./gradlew installDebug
+
+# Or build and install in one step
+./gradlew installDebug
+```
+
+The APK will be generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
 ## License
 
