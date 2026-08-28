@@ -320,7 +320,7 @@ private fun WeeklyBarChart(labels: List<String>, values: List<Int>) {
     val valueFormatter = remember(labels) {
         CartesianValueFormatter { _, value, _ ->
             val index = value.toInt()
-            if (index in labels.indices) labels[index] else ""
+            if (index in labels.indices) labels[index] else index.toString()
         }
     }
 
@@ -538,10 +538,15 @@ private fun SessionItem(
     }
 }
 
+@Composable
 private fun formatMinutes(totalMinutes: Int): String {
     val hours = totalMinutes / 60
     val minutes = totalMinutes % 60
-    return if (hours > 0) "${hours}ч ${minutes}м" else "${minutes}м"
+    return if (hours > 0) {
+        stringResource(R.string.stat_hours, hours, minutes)
+    } else {
+        stringResource(R.string.stat_minutes, minutes)
+    }
 }
 
 private fun showDatePicker(context: Context, initialDate: Long?, onDateSelected: (Long) -> Unit) {
