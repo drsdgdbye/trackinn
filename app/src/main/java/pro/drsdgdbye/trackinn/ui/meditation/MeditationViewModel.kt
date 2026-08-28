@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import pro.drsdgdbye.trackinn.R
 import pro.drsdgdbye.trackinn.data.db.TrackinnDatabase
@@ -72,16 +74,25 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
     val dailyStats = MutableStateFlow<List<DailyStat>>(emptyList())
     val filteredSessions = MutableStateFlow<List<MeditationSessionEntity>>(emptyList())
 
+    private val _soundsReady = MutableStateFlow(false)
+    val soundsReady: StateFlow<Boolean> = _soundsReady.asStateFlow()
+
     private var timerJob: Job? = null
     private var soundPool: SoundPool? = null
     private var soundMap = mutableMapOf<String, Int>()
-    private var soundsLoaded = false
+    private var loadedSoundsCount = 0
     private var sessionStartTime: Long = 0L
 
     init {
         repository = SavedTimerRepository(db.savedTimerDao(), db.meditationSessionDao())
         viewModelScope.launch {
-            repository.getAllTimers().collect { timers.value = it }
+            repository.getAllTimers().collect { timerList ->
+                val migrated = mutableListOf<SavedTimerEntity>()
+                for (timer in timerList) {
+                    migrated.add(migrateTimerIfNeeded(timer))
+                }
+                timers.value = migrated
+            }
         }
         viewModelScope.launch {
             repository.getAllSessions().collect { sessions.value = it }
@@ -107,6 +118,30 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
         initSounds()
+    }
+
+    private val soundMigrationMap = mapOf(
+        "plink" to "meditation_start",
+        "bell" to "meditation_end",
+        "chime" to "meditation_checkpoint",
+        "gong" to "meditation_checkpoint",
+        "drop" to "meditation_checkpoint"
+    )
+
+    private suspend fun migrateTimerIfNeeded(timer: SavedTimerEntity): SavedTimerEntity {
+        var updated = timer
+        val newStartSound = soundMigrationMap[timer.startSound] ?: timer.startSound
+        val newEndSound = soundMigrationMap[timer.endSound] ?: timer.endSound
+        val newCheckpointSound = soundMigrationMap[timer.checkpointSound] ?: timer.checkpointSound
+        if (newStartSound != timer.startSound || newEndSound != timer.endSound || newCheckpointSound != timer.checkpointSound) {
+            updated = timer.copy(
+                startSound = newStartSound,
+                endSound = newEndSound,
+                checkpointSound = newCheckpointSound
+            )
+            repository.updateTimer(updated)
+        }
+        return updated
     }
 
     private fun getPeriodRange(now: LocalDate, period: StatsPeriod): Pair<LocalDate, LocalDate> {
@@ -222,7 +257,10 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
         val app = getApplication<Application>()
         soundPool = SoundPool.Builder().setMaxStreams(3).build()
         soundPool?.setOnLoadCompleteListener { _, _, _ ->
-            soundsLoaded = true
+            loadedSoundsCount++
+            if (loadedSoundsCount >= 3) {
+                _soundsReady.value = true
+            }
         }
         soundMap["meditation_start"] = soundPool!!.load(app, R.raw.meditation_start, 1)
         soundMap["meditation_end"] = soundPool!!.load(app, R.raw.meditation_end, 1)
@@ -230,7 +268,7 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun playSound(soundName: String?) {
-        if (!soundsLoaded) return
+        if (!_soundsReady.value) return
         val id = soundMap[soundName] ?: soundMap["meditation_start"] ?: return
         soundPool?.play(id, 1f, 1f, 1, 0, 1f)
     }
@@ -259,6 +297,10 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
                     _uiState.value = _uiState.value.copy(prepRemaining = i)
                     delay(1000)
                 }
+            }
+            // Wait for sounds to be ready before playing start sound
+            if (!_soundsReady.value) {
+                soundsReady.filter { it }.first()
             }
             playSound(timer.startSound)
             val totalSeconds = timer.totalMinutes * 60

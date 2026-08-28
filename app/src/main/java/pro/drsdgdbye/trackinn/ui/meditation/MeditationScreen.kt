@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import pro.drsdgdbye.trackinn.R
 import pro.drsdgdbye.trackinn.data.db.entity.SavedTimerEntity
 import sh.calvin.reorderable.ReorderableItem
@@ -45,7 +44,7 @@ fun MeditationScreen(
     onTimerClick: (Long) -> Unit = {},
     onStartTimer: (Long) -> Unit = {},
     onHistoryClick: () -> Unit = {},
-    viewModel: MeditationViewModel = viewModel()
+    viewModel: MeditationViewModel
 ) {
     val timers by viewModel.timers.collectAsState()
     val listState = rememberLazyListState()

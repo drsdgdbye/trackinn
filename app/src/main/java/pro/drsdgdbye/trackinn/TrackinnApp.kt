@@ -14,6 +14,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -194,7 +195,8 @@ fun TrackinnApp() {
                 )
             }
             composable(Screen.Meditation.route) {
-                val meditationViewModel: MeditationViewModel = viewModel()
+                val meditationBackStackEntry = remember(navController) { navController.getBackStackEntry(Screen.Meditation.route) }
+                val meditationViewModel: MeditationViewModel = viewModel(meditationBackStackEntry)
                 MeditationScreen(
                     onAddClick = { navController.navigate(Screen.TimerEditor.createRoute()) },
                     onTimerClick = { timerId -> navController.navigate(Screen.TimerEditor.createRoute(timerId)) },
@@ -208,7 +210,8 @@ fun TrackinnApp() {
                 arguments = listOf(navArgument("timerId") { type = NavType.LongType; defaultValue = -1L })
             ) { backStackEntry ->
                 val timerId = backStackEntry.arguments?.getLong("timerId") ?: -1L
-                val meditationViewModel: MeditationViewModel = viewModel()
+                val meditationBackStackEntry = remember(navController) { navController.getBackStackEntry(Screen.Meditation.route) }
+                val meditationViewModel: MeditationViewModel = viewModel(meditationBackStackEntry)
                 TimerEditorScreen(
                     timerId = timerId,
                     onBack = { navController.popBackStack() },
@@ -220,7 +223,8 @@ fun TrackinnApp() {
                 arguments = listOf(navArgument("timerId") { type = NavType.LongType })
             ) { backStackEntry ->
                 val timerId = backStackEntry.arguments?.getLong("timerId") ?: -1L
-                val meditationViewModel: MeditationViewModel = viewModel()
+                val meditationBackStackEntry = remember(navController) { navController.getBackStackEntry(Screen.Meditation.route) }
+                val meditationViewModel: MeditationViewModel = viewModel(meditationBackStackEntry)
                 TimerRunningScreen(
                     timerId = timerId,
                     onBack = { navController.popBackStack() },
@@ -228,7 +232,8 @@ fun TrackinnApp() {
                 )
             }
             composable(Screen.MeditationHistory.route) {
-                val meditationViewModel: MeditationViewModel = viewModel()
+                val meditationBackStackEntry = remember(navController) { navController.getBackStackEntry(Screen.Meditation.route) }
+                val meditationViewModel: MeditationViewModel = viewModel(meditationBackStackEntry)
                 MeditationHistoryScreen(
                     onBack = { navController.popBackStack() },
                     viewModel = meditationViewModel
