@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -50,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +65,7 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
 import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
 import pro.drsdgdbye.trackinn.R
@@ -69,6 +73,8 @@ import pro.drsdgdbye.trackinn.data.db.entity.MeditationSessionEntity
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Month
+import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
 import java.util.Calendar
 import java.util.Date
@@ -147,9 +153,30 @@ fun MeditationHistoryScreen(
 
             // Bar chart
             item {
-                if (weeklyStats.isNotEmpty()) {
-                    WeeklyBarChart(weeklyStats = weeklyStats)
-                    Spacer(modifier = Modifier.height(16.dp))
+                val configuration = LocalConfiguration.current
+                val chartLocale = configuration.locales[0]
+                if (selectedPeriod == StatsPeriod.WEEK) {
+                    if (dailyStats.isNotEmpty()) {
+                        WeeklyBarChart(
+                            labels = dailyStats.map {
+                                it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, chartLocale)
+                            },
+                            values = dailyStats.map { it.totalMinutes }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                } else {
+                    if (weeklyStats.isNotEmpty()) {
+                        val labels = when (selectedPeriod) {
+                            StatsPeriod.MONTH -> weeklyStats.mapIndexed { index, _ -> "${index + 1}" }
+                            StatsPeriod.YEAR -> weeklyStats.map {
+                                Month.of(it.weekStart.monthValue).getDisplayName(TextStyle.SHORT, chartLocale)
+                            }
+                            else -> emptyList()
+                        }
+                        WeeklyBarChart(labels = labels, values = weeklyStats.map { it.totalMinutes })
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
 
@@ -168,8 +195,14 @@ fun MeditationHistoryScreen(
                     endDate = endDate,
                     dateFormat = dateFormat,
                     activityContext = activityContext,
-                    onStartChanged = { startDate = it },
-                    onEndChanged = { endDate = it }
+                    onStartChanged = {
+                        startDate = it
+                        viewModel.setDateFilter(it, endDate)
+                    },
+                    onEndChanged = {
+                        endDate = it
+                        viewModel.setDateFilter(startDate, it)
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -273,14 +306,21 @@ private fun StatCard(
 }
 
 @Composable
-private fun WeeklyBarChart(weeklyStats: List<WeeklyStat>) {
+private fun WeeklyBarChart(labels: List<String>, values: List<Int>) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    LaunchedEffect(weeklyStats) {
+    LaunchedEffect(values) {
         modelProducer.runTransaction {
             columnModel {
-                series(weeklyStats.map { it.totalMinutes })
+                series(values)
             }
+        }
+    }
+
+    val valueFormatter = remember(labels) {
+        CartesianValueFormatter { _, value, _ ->
+            val index = value.toInt()
+            if (index in labels.indices) labels[index] else ""
         }
     }
 
@@ -294,7 +334,7 @@ private fun WeeklyBarChart(weeklyStats: List<WeeklyStat>) {
             chart = rememberCartesianChart(
                 rememberColumnCartesianLayer(),
                 startAxis = VerticalAxis.rememberStart(),
-                bottomAxis = HorizontalAxis.rememberBottom(),
+                bottomAxis = HorizontalAxis.rememberBottom(valueFormatter = valueFormatter),
             ),
             modelProducer = modelProducer,
             modifier = Modifier
@@ -337,7 +377,9 @@ private fun HeatmapCalendar(dailyStats: List<DailyStat>) {
             modifier = Modifier.padding(bottom = 8.dp)
         )
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             weeks.forEach { week ->

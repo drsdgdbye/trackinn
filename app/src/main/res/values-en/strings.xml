@@ -189,4 +189,17 @@
     <string name="completed">Completed</string>
     <string name="interrupted">Interrupted</string>
     <string name="no_sessions">No sessions</string>
+
+    <!-- Stats Dashboard -->
+    <string name="stat_total_sessions">Total sessions</string>
+    <string name="stat_total_time">Total time</string>
+    <string name="stat_streak">Streak</string>
+    <string name="stat_completion">Completion</string>
+    <string name="stat_streak_days">%d d</string>
+    <string name="stat_percent">%d%%</string>
+    <string name="stat_hours">%1$d h %2$d min</string>
+    <string name="stat_minutes">%d min</string>
+    <string name="tab_week">Week</string>
+    <string name="tab_month">Month</string>
+    <string name="tab_year">Year</string>
 </resources>

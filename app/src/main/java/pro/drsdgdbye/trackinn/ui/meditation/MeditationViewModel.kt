@@ -3,7 +3,10 @@ package pro.drsdgdbye.trackinn.ui.meditation
 import android.app.Application
 import android.media.SoundPool
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +20,7 @@ import pro.drsdgdbye.trackinn.R
 import pro.drsdgdbye.trackinn.data.db.TrackinnDatabase
 import pro.drsdgdbye.trackinn.data.db.entity.MeditationSessionEntity
 import pro.drsdgdbye.trackinn.data.db.entity.SavedTimerEntity
+import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.SavedTimerRepository
 import java.time.DayOfWeek
 import java.time.Instant
@@ -59,8 +63,10 @@ data class DailyStat(
     val totalMinutes: Int
 )
 
-class MeditationViewModel(application: Application) : AndroidViewModel(application) {
+class MeditationViewModel(
+    application: Application,
     private val repository: SavedTimerRepository
+) : AndroidViewModel(application) {
     private val db = TrackinnDatabase.getInstance(application)
 
     val timers = MutableStateFlow<List<SavedTimerEntity>>(emptyList())
@@ -69,6 +75,7 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
     val uiState: StateFlow<TimerUiState> = _uiState.asStateFlow()
 
     val selectedPeriod = MutableStateFlow(StatsPeriod.MONTH)
+    val dateFilter = MutableStateFlow<Pair<Long?, Long?>>(null to null)
     val dashboardStats = MutableStateFlow(DashboardStats())
     val weeklyStats = MutableStateFlow<List<WeeklyStat>>(emptyList())
     val dailyStats = MutableStateFlow<List<DailyStat>>(emptyList())
@@ -84,7 +91,6 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
     private var sessionStartTime: Long = 0L
 
     init {
-        repository = SavedTimerRepository(db.savedTimerDao(), db.meditationSessionDao())
         viewModelScope.launch {
             repository.getAllTimers().collect { timerList ->
                 val migrated = mutableListOf<SavedTimerEntity>()
@@ -98,13 +104,22 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
             repository.getAllSessions().collect { sessions.value = it }
         }
         viewModelScope.launch {
-            combine(sessions, selectedPeriod) { allSessions, period ->
+            combine(sessions, selectedPeriod, dateFilter) { allSessions, period, (filterStart, filterEnd) ->
                 val now = LocalDate.now()
-                val (start, end) = getPeriodRange(now, period)
                 val zone = ZoneId.systemDefault()
-                val filtered = allSessions.filter { session ->
-                    val sessionDate = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
-                    !sessionDate.isBefore(start) && !sessionDate.isAfter(end)
+                val filtered = if (filterStart != null && filterEnd != null) {
+                    val startDate = Instant.ofEpochMilli(filterStart).atZone(zone).toLocalDate()
+                    val endDate = Instant.ofEpochMilli(filterEnd).atZone(zone).toLocalDate()
+                    allSessions.filter { session ->
+                        val sessionDate = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
+                        !sessionDate.isBefore(startDate) && !sessionDate.isAfter(endDate)
+                    }
+                } else {
+                    val (start, end) = getPeriodRange(now, period)
+                    allSessions.filter { session ->
+                        val sessionDate = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
+                        !sessionDate.isBefore(start) && !sessionDate.isAfter(end)
+                    }
                 }
                 val stats = computeDashboardStats(allSessions)
                 val weekly = computeWeeklyStats(allSessions, now, period)
@@ -203,25 +218,43 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
         period: StatsPeriod
     ): List<WeeklyStat> {
         val zone = ZoneId.systemDefault()
-        val weeksCount = when (period) {
-            StatsPeriod.WEEK -> 1
-            StatsPeriod.MONTH -> 4
-            StatsPeriod.YEAR -> 12
-        }
-        val result = mutableListOf<WeeklyStat>()
-        for (i in (weeksCount - 1) downTo 0) {
-            val weekEnd = now.minusWeeks(i.toLong())
-            val weekStart = weekEnd.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-            val weekEndClamped = weekEnd.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
-            val minutes = sessions
-                .filter { session ->
-                    val d = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
-                    !d.isBefore(weekStart) && !d.isAfter(weekEndClamped)
+        return when (period) {
+            StatsPeriod.WEEK -> {
+                emptyList()
+            }
+            StatsPeriod.MONTH -> {
+                val weeksCount = 4
+                val result = mutableListOf<WeeklyStat>()
+                for (i in (weeksCount - 1) downTo 0) {
+                    val weekEnd = now.minusWeeks(i.toLong())
+                    val weekStart = weekEnd.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    val weekEndClamped = weekEnd.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+                    val minutes = sessions
+                        .filter { session ->
+                            val d = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
+                            !d.isBefore(weekStart) && !d.isAfter(weekEndClamped)
+                        }
+                        .sumOf { it.durationMinutes }
+                    result.add(WeeklyStat(weekStart, minutes))
                 }
-                .sumOf { it.durationMinutes }
-            result.add(WeeklyStat(weekStart, minutes))
+                result
+            }
+            StatsPeriod.YEAR -> {
+                val result = mutableListOf<WeeklyStat>()
+                for (i in 11 downTo 0) {
+                    val monthStart = now.minusMonths(i.toLong()).withDayOfMonth(1)
+                    val monthEnd = monthStart.plusMonths(1).minusDays(1)
+                    val minutes = sessions
+                        .filter { session ->
+                            val d = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
+                            !d.isBefore(monthStart) && !d.isAfter(monthEnd)
+                        }
+                        .sumOf { it.durationMinutes }
+                    result.add(WeeklyStat(monthStart, minutes))
+                }
+                result
+            }
         }
-        return result
     }
 
     private fun computeDailyStats(
@@ -230,18 +263,25 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
         period: StatsPeriod
     ): List<DailyStat> {
         val zone = ZoneId.systemDefault()
-        val daysCount = when (period) {
-            StatsPeriod.WEEK -> 7
-            StatsPeriod.MONTH -> now.lengthOfMonth()
-            StatsPeriod.YEAR -> if (now.isLeapYear) 366 else 365
+        val (start, end) = when (period) {
+            StatsPeriod.WEEK -> {
+                val weekStart = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                weekStart to weekStart.plusDays(6)
+            }
+            StatsPeriod.MONTH -> {
+                now.withDayOfMonth(1) to now
+            }
+            StatsPeriod.YEAR -> {
+                val daysCount = if (now.isLeapYear) 366 else 365
+                now.minusDays((daysCount - 1).toLong()) to now
+            }
         }
-        val start = now.minusDays((daysCount - 1).toLong())
         val sessionMap = sessions.groupBy { session ->
             Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
         }
         val result = mutableListOf<DailyStat>()
         var current = start
-        while (!current.isAfter(now)) {
+        while (!current.isAfter(end)) {
             val minutes = sessionMap[current]?.sumOf { it.durationMinutes } ?: 0
             result.add(DailyStat(current, minutes))
             current = current.plusDays(1)
@@ -251,6 +291,10 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
 
     fun setPeriod(period: StatsPeriod) {
         selectedPeriod.value = period
+    }
+
+    fun setDateFilter(start: Long?, end: Long?) {
+        dateFilter.value = start to end
     }
 
     private fun initSounds() {
@@ -400,5 +444,18 @@ class MeditationViewModel(application: Application) : AndroidViewModel(applicati
         super.onCleared()
         timerJob?.cancel()
         soundPool?.release()
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+                    ?: error("MeditationViewModel requires an Application")
+                MeditationViewModel(
+                    app,
+                    appContainer().savedTimerRepository
+                )
+            }
+        }
     }
 }
