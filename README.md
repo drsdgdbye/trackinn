@@ -1,122 +1,39 @@
 # TrackInn
 
-**Твой личный трекер: задачи, калории, медитация — всё в одном приложении.**
+TrackInn is an offline-first Android app that combines a task tracker, calorie counter, and meditation timer into a single interface. No accounts, no cloud sync — everything stays on your device.
 
----
+## What it does
 
-## Описание
+TrackInn is built around three independent modules that can be enabled or disabled individually. The app is fully bilingual (English and Russian) and supports light, dark, and system themes.
 
-TrackInn — это Android-приложение для тех, кто хочет держать свою жизнь под контролем. Управляй задачами с drag-and-drop, считай калории с составными блюдами, медитируй с красивым таймером. Всё в одном месте, всё офлайн.
+### Todo
 
-## Возможности
+A simple task list with manual ordering. Tasks can be reordered via drag-and-drop. Each task optionally has a deadline (date + time), and the text color gradually shifts from black to yellow to red as the deadline approaches. Tasks can be added to Google Calendar with one tap.
 
-### Задачи (Todo)
+### Calorie tracker
 
-- Список задач с ручной сортировкой (drag-and-drop)
-- Чекбоксы для выполненных задач
-- Дата и время дедлайна
-- Цветовой градиент: чёрный → жёлтый → красный по приближению к дедлайну
-- Добавление задач в Google Calendar одной кнопкой
+Track meals across four categories: breakfast, lunch, snack, dinner. The app maintains a local product database with per-100g nutritional values (calories, protein, fat, carbs) and supports composite dishes — recipes made of multiple ingredients with automatic calorie calculation. The daily progress bar at the bottom shows how close you are to your calorie goal, with configurable colors for normal, approaching, and exceeding states.
 
-### Калории (Calories)
+### Meditation timer
 
-- Трекер приёмов пищи: завтрак, обед, перекус, ужин
-- База продуктов с КБЖУ на 100г/мл
-- Составные блюда с автоматическим расчётом калорий
-- 8 типов блюд: супы, горячие, гарниры, салаты, десерты, перекусы, напитки, другое
-- Прогресс-бар с настраиваемыми цветами из настроек
-- Уникальность названий блюд с валидацией
-- Поиск продуктов с debounce 300мс
+A configurable meditation timer with a circular progress ring and checkpoint markers. Timers support a preparation countdown, multiple checkpoints with separate sounds, and five built-in sounds (plink, bell, chime, gong, drop). Sessions are recorded to a local history with completion status and can be filtered by date range.
 
-### Медитация (Meditation)
+### Settings and customization
 
-- Сохранённые таймеры с настройками
-- Прогресс-кольцо с контрольными точками
-- Обратный отсчёт подготовки
-- Встроенные звуки: plink, bell, chime, gong, drop
-- Пауза / возобновление / остановка
-- История сессий с фильтрацией по дате
-- Запись сессий: завершённые и прерванные
+The app provides a palette of 20 Material Design colors that can be assigned to various UI elements — task deadlines, calorie progress, meditation rings. Modules can be toggled on or off. All data can be exported to and imported from JSON.
 
-### Настройки
+## Tech stack
 
-- Включение/выключение модулей (задачи, калории, медитация)
-- Темы: светлая, тёмная, системная
-- Языки: русский, английский, системный
-- Палитра из 20 цветов Material Design
-- Настраиваемые цвета для каждого модуля
-- Дневная цель калорий
-
-### Данные
-
-- Полный экспорт/импорт всех данных в JSON
-- Данные хранятся локально (Room + DataStore)
-- Нет необходимости в интернете
-
-## Технологии
-
-| Технология | Назначение |
+| Component | Technology |
 |---|---|
-| **Kotlin** | Язык программирования |
-| **Jetpack Compose** | UI |
-| **Material 3** | Дизайн-система |
-| **Room** | Локальная база данных |
-| **DataStore** | Хранение настроек |
-| **Navigation Compose** | Навигация |
-| **KSP** | Обработка аннотаций (Room) |
-| **sh.calvin.reorderable** | Drag-and-drop reorder |
+| Language | Kotlin |
+| UI | Jetpack Compose + Material 3 |
+| Database | Room |
+| Preferences | DataStore |
+| Navigation | Navigation Compose |
+| Drag-and-drop | sh.calvin.reorderable |
+| Annotation processing | KSP |
 
-## Запуск
+## License
 
-### Требования
-
-- Android Studio Ladybug (2024.2) или новее
-- JDK 17+
-- Android SDK 37
-- Устройство или эмулятор с Android 9+ (API 28)
-
-### Сборка
-
-```bash
-# Клонируй репозиторий
-git clone git@github.com:drsdgdbye/trackinn.git
-cd trackinn
-
-# Собери debug APK
-./gradlew assembleDebug
-
-# APK будет в app/build/outputs/apk/debug/app-debug.apk
-```
-
-### Установка на устройство
-
-```bash
-# Через ADB
-adb install app/build/outputs/apk/debug/app-debug.apk
-```
-
-Или открой проект в Android Studio и нажми ▶ Run.
-
-## Структура проекта
-
-```
-app/src/main/java/pro/drsdgdbye/trackinn/
-├── data/
-│   ├── db/              # Room: DAO, Entity, Database
-│   ├── export/          # Экспорт/импорт JSON
-│   ├── repository/      # Репозитории
-│   └── settings/        # DataStore настройки
-├── ui/
-│   ├── calorie/         # Экраны калорий
-│   ├── meditation/      # Экраны медитации
-│   ├── navigation/      # Навигация
-│   ├── settings/        # Настройки
-│   ├── theme/           # Цвета, тема, типографика
-│   └── todo/            # Экраны задач
-├── MainActivity.kt
-└── TrackinnApp.kt       # Корневой компонент
-```
-
-## Лицензия
-
-Личный проект. Все права защищены.
+This project is licensed under the [Do What The Fuck You Want To Public License (WTFPL)](https://www.wtfpl.net/).
