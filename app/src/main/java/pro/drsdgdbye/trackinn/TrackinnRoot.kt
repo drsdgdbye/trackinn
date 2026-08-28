@@ -193,8 +193,8 @@ fun TrackinnRoot() {
                     viewModel = dishEditorViewModel
                 )
             }
-            composable(Screen.Meditation.route) {
-                val meditationBackStackEntry = remember(navController) { navController.getBackStackEntry(Screen.Meditation.route) }
+            composable(Screen.Meditation.route) { backStackEntry ->
+                val meditationBackStackEntry = remember(backStackEntry) { navController.getBackStackEntry(Screen.Meditation.route) }
                 val meditationViewModel: MeditationViewModel = viewModel(meditationBackStackEntry, factory = MeditationViewModel.Factory)
                 MeditationScreen(
                     onAddClick = { navController.navigate(Screen.TimerEditor.createRoute()) },
@@ -209,7 +209,7 @@ fun TrackinnRoot() {
                 arguments = listOf(navArgument("timerId") { type = NavType.LongType; defaultValue = -1L })
             ) { backStackEntry ->
                 val timerId = backStackEntry.arguments?.getLong("timerId") ?: -1L
-                val meditationBackStackEntry = remember(navController) { navController.getBackStackEntry(Screen.Meditation.route) }
+                val meditationBackStackEntry = remember(backStackEntry) { navController.getBackStackEntry(Screen.Meditation.route) }
                 val meditationViewModel: MeditationViewModel = viewModel(meditationBackStackEntry, factory = MeditationViewModel.Factory)
                 TimerEditorScreen(
                     timerId = timerId,
@@ -222,7 +222,7 @@ fun TrackinnRoot() {
                 arguments = listOf(navArgument("timerId") { type = NavType.LongType })
             ) { backStackEntry ->
                 val timerId = backStackEntry.arguments?.getLong("timerId") ?: -1L
-                val meditationBackStackEntry = remember(navController) { navController.getBackStackEntry(Screen.Meditation.route) }
+                val meditationBackStackEntry = remember(backStackEntry) { navController.getBackStackEntry(Screen.Meditation.route) }
                 val meditationViewModel: MeditationViewModel = viewModel(meditationBackStackEntry, factory = MeditationViewModel.Factory)
                 TimerRunningScreen(
                     timerId = timerId,
@@ -230,8 +230,8 @@ fun TrackinnRoot() {
                     viewModel = meditationViewModel
                 )
             }
-            composable(Screen.MeditationHistory.route) {
-                val meditationBackStackEntry = remember(navController) { navController.getBackStackEntry(Screen.Meditation.route) }
+            composable(Screen.MeditationHistory.route) { backStackEntry ->
+                val meditationBackStackEntry = remember(backStackEntry) { navController.getBackStackEntry(Screen.Meditation.route) }
                 val meditationViewModel: MeditationViewModel = viewModel(meditationBackStackEntry, factory = MeditationViewModel.Factory)
                 MeditationHistoryScreen(
                     onBack = { navController.popBackStack() },

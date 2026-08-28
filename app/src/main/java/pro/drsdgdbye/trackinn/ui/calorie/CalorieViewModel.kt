@@ -21,6 +21,9 @@ class CalorieViewModel(
 ) : ViewModel() {
 
     val caloriesDailyGoal = settingsRepository.caloriesDailyGoal
+    val progressBarColor = settingsRepository.progressBarColor
+    val approachingGoalColor = settingsRepository.approachingGoalColor
+    val exceedingGoalColor = settingsRepository.exceedingGoalColor
 
     private val today: Long = MealRepository.startOfDay(System.currentTimeMillis())
 

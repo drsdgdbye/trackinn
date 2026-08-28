@@ -37,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import pro.drsdgdbye.trackinn.R
 import pro.drsdgdbye.trackinn.data.db.entity.MealItemEntity
-import pro.drsdgdbye.trackinn.data.settings.SettingsRepository
 import java.text.SimpleDateFormat
 import androidx.compose.ui.graphics.Color as ComposeColor
 import java.util.Date
@@ -66,11 +64,9 @@ fun CalorieScreen(
     val totalCalories = meals.sumOf { meal -> meal.items.sumOf { it.calories } }
     val progress = if (caloriesDailyGoal > 0) totalCalories.toFloat() / caloriesDailyGoal else 0f
 
-    val context = LocalContext.current
-    val settings = remember { SettingsRepository(context) }
-    val progressBarColorHex by settings.progressBarColor.collectAsState(initial = "#4CAF50")
-    val approachingGoalColorHex by settings.approachingGoalColor.collectAsState(initial = "#FF9800")
-    val exceedingGoalColorHex by settings.exceedingGoalColor.collectAsState(initial = "#F44336")
+    val progressBarColorHex by viewModel.progressBarColor.collectAsState(initial = "#4CAF50")
+    val approachingGoalColorHex by viewModel.approachingGoalColor.collectAsState(initial = "#FF9800")
+    val exceedingGoalColorHex by viewModel.exceedingGoalColor.collectAsState(initial = "#F44336")
 
     val progressBarColor = remember(progressBarColorHex) {
         try { ComposeColor(android.graphics.Color.parseColor(progressBarColorHex)) } catch (e: Exception) { ComposeColor(0xFF4CAF50) }

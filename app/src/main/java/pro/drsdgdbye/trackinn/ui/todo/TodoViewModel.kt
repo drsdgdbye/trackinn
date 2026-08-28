@@ -9,10 +9,19 @@ import kotlinx.coroutines.launch
 import pro.drsdgdbye.trackinn.data.db.entity.TaskEntity
 import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.TaskRepository
+import pro.drsdgdbye.trackinn.data.settings.SettingsRepository
 
-class TodoViewModel(private val repository: TaskRepository) : ViewModel() {
+class TodoViewModel(
+    private val repository: TaskRepository,
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
 
     val tasks: MutableStateFlow<List<TaskEntity>> = MutableStateFlow(emptyList())
+
+    val completedTaskColor = settingsRepository.completedTaskColor
+    val deadlineSafeColor = settingsRepository.deadlineSafeColor
+    val deadlineWarningColor = settingsRepository.deadlineWarningColor
+    val deadlineDangerColor = settingsRepository.deadlineDangerColor
 
     init {
         viewModelScope.launch {
@@ -46,7 +55,8 @@ class TodoViewModel(private val repository: TaskRepository) : ViewModel() {
     companion object {
         val Factory = viewModelFactory {
             initializer {
-                TodoViewModel(appContainer().taskRepository)
+                val container = appContainer()
+                TodoViewModel(container.taskRepository, container.settingsRepository)
             }
         }
     }

@@ -29,14 +29,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import pro.drsdgdbye.trackinn.R
 import pro.drsdgdbye.trackinn.data.db.entity.TaskEntity
-import pro.drsdgdbye.trackinn.data.settings.SettingsRepository
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.text.SimpleDateFormat
@@ -124,13 +122,11 @@ fun TodoScreen(
     onTaskClick: (Long) -> Unit = {},
     viewModel: TodoViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-    val settings = remember { SettingsRepository(context) }
     val tasks by viewModel.tasks.collectAsState()
-    val completedColorHex by settings.completedTaskColor.collectAsState(initial = "#9E9E9E")
-    val safeColorHex by settings.deadlineSafeColor.collectAsState(initial = null)
-    val warningColorHex by settings.deadlineWarningColor.collectAsState(initial = "#FFC107")
-    val dangerColorHex by settings.deadlineDangerColor.collectAsState(initial = "#F44336")
+    val completedColorHex by viewModel.completedTaskColor.collectAsState(initial = "#9E9E9E")
+    val safeColorHex by viewModel.deadlineSafeColor.collectAsState(initial = null)
+    val warningColorHex by viewModel.deadlineWarningColor.collectAsState(initial = "#FFC107")
+    val dangerColorHex by viewModel.deadlineDangerColor.collectAsState(initial = "#F44336")
 
     // Контрастные к фону цвета темы — используются по умолчанию
     val defaultTextColor = MaterialTheme.colorScheme.onSurface

@@ -2,7 +2,7 @@ package pro.drsdgdbye.trackinn.ui.meditation
 
 import android.app.Application
 import android.media.SoundPool
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -17,20 +17,16 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import pro.drsdgdbye.trackinn.R
-import pro.drsdgdbye.trackinn.data.db.TrackinnDatabase
 import pro.drsdgdbye.trackinn.data.db.entity.MeditationSessionEntity
 import pro.drsdgdbye.trackinn.data.db.entity.SavedTimerEntity
 import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.SavedTimerRepository
-import java.time.DayOfWeek
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
 enum class TimerState { IDLE, PREP, RUNNING, PAUSED, COMPLETED }
@@ -64,10 +60,9 @@ data class DailyStat(
 )
 
 class MeditationViewModel(
-    application: Application,
+    private val application: Application,
     private val repository: SavedTimerRepository
-) : AndroidViewModel(application) {
-    private val db = TrackinnDatabase.getInstance(application)
+) : ViewModel() {
 
     val timers = MutableStateFlow<List<SavedTimerEntity>>(emptyList())
     val sessions = MutableStateFlow<List<MeditationSessionEntity>>(emptyList())
@@ -108,22 +103,14 @@ class MeditationViewModel(
                 val now = LocalDate.now()
                 val zone = ZoneId.systemDefault()
                 val filtered = if (filterStart != null && filterEnd != null) {
-                    val startDate = Instant.ofEpochMilli(filterStart).atZone(zone).toLocalDate()
-                    val endDate = Instant.ofEpochMilli(filterEnd).atZone(zone).toLocalDate()
-                    allSessions.filter { session ->
-                        val sessionDate = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
-                        !sessionDate.isBefore(startDate) && !sessionDate.isAfter(endDate)
-                    }
+                    MeditationStats.filterSessionsByEpochRange(allSessions, filterStart, filterEnd, zone)
                 } else {
-                    val (start, end) = getPeriodRange(now, period)
-                    allSessions.filter { session ->
-                        val sessionDate = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
-                        !sessionDate.isBefore(start) && !sessionDate.isAfter(end)
-                    }
+                    val (start, end) = MeditationStats.getPeriodRange(now, period)
+                    MeditationStats.filterSessionsByRange(allSessions, start, end, zone)
                 }
-                val stats = computeDashboardStats(allSessions)
-                val weekly = computeWeeklyStats(allSessions, now, period)
-                val daily = computeDailyStats(allSessions, now, period)
+                val stats = MeditationStats.computeDashboardStats(allSessions, now, zone)
+                val weekly = MeditationStats.computeWeeklyStats(allSessions, now, period, zone)
+                val daily = MeditationStats.computeDailyStats(allSessions, now, period, zone)
                 Triple(stats, weekly, daily) to filtered
             }.collect { (statsPair, filtered) ->
                 dashboardStats.value = statsPair.first
@@ -159,136 +146,6 @@ class MeditationViewModel(
         return updated
     }
 
-    private fun getPeriodRange(now: LocalDate, period: StatsPeriod): Pair<LocalDate, LocalDate> {
-        return when (period) {
-            StatsPeriod.WEEK -> {
-                val start = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                start to now
-            }
-            StatsPeriod.MONTH -> {
-                val start = now.withDayOfMonth(1)
-                start to now
-            }
-            StatsPeriod.YEAR -> {
-                val start = now.withDayOfYear(1)
-                start to now
-            }
-        }
-    }
-
-    private fun computeDashboardStats(sessions: List<MeditationSessionEntity>): DashboardStats {
-        if (sessions.isEmpty()) return DashboardStats()
-        val totalSessions = sessions.size
-        val totalMinutes = sessions.sumOf { it.durationMinutes }
-        val completed = sessions.count { it.wasCompleted }
-        val completionRate = if (totalSessions > 0) (completed * 100 / totalSessions) else 0
-        val streak = computeStreak(sessions)
-        return DashboardStats(totalSessions, totalMinutes, streak, completionRate)
-    }
-
-    private fun computeStreak(sessions: List<MeditationSessionEntity>): Int {
-        if (sessions.isEmpty()) return 0
-        val zone = ZoneId.systemDefault()
-        val sessionDates = sessions
-            .map { Instant.ofEpochMilli(it.startedAt).atZone(zone).toLocalDate() }
-            .distinct()
-            .sortedDescending()
-        val today = LocalDate.now()
-        var streak = 0
-        var expectedDate = today
-        for (date in sessionDates) {
-            if (date == expectedDate) {
-                streak++
-                expectedDate = expectedDate.minusDays(1)
-            } else if (date == expectedDate.minusDays(1)) {
-                // Allow gap if today hasn't been meditated yet
-                expectedDate = date
-                streak++
-                expectedDate = expectedDate.minusDays(1)
-            } else {
-                break
-            }
-        }
-        return streak
-    }
-
-    private fun computeWeeklyStats(
-        sessions: List<MeditationSessionEntity>,
-        now: LocalDate,
-        period: StatsPeriod
-    ): List<WeeklyStat> {
-        val zone = ZoneId.systemDefault()
-        return when (period) {
-            StatsPeriod.WEEK -> {
-                emptyList()
-            }
-            StatsPeriod.MONTH -> {
-                val weeksCount = 4
-                val result = mutableListOf<WeeklyStat>()
-                for (i in (weeksCount - 1) downTo 0) {
-                    val weekEnd = now.minusWeeks(i.toLong())
-                    val weekStart = weekEnd.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                    val weekEndClamped = weekEnd.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
-                    val minutes = sessions
-                        .filter { session ->
-                            val d = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
-                            !d.isBefore(weekStart) && !d.isAfter(weekEndClamped)
-                        }
-                        .sumOf { it.durationMinutes }
-                    result.add(WeeklyStat(weekStart, minutes))
-                }
-                result
-            }
-            StatsPeriod.YEAR -> {
-                val result = mutableListOf<WeeklyStat>()
-                for (i in 11 downTo 0) {
-                    val monthStart = now.minusMonths(i.toLong()).withDayOfMonth(1)
-                    val monthEnd = monthStart.plusMonths(1).minusDays(1)
-                    val minutes = sessions
-                        .filter { session ->
-                            val d = Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
-                            !d.isBefore(monthStart) && !d.isAfter(monthEnd)
-                        }
-                        .sumOf { it.durationMinutes }
-                    result.add(WeeklyStat(monthStart, minutes))
-                }
-                result
-            }
-        }
-    }
-
-    private fun computeDailyStats(
-        sessions: List<MeditationSessionEntity>,
-        now: LocalDate,
-        period: StatsPeriod
-    ): List<DailyStat> {
-        val zone = ZoneId.systemDefault()
-        val (start, end) = when (period) {
-            StatsPeriod.WEEK -> {
-                val weekStart = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                weekStart to weekStart.plusDays(6)
-            }
-            StatsPeriod.MONTH -> {
-                now.withDayOfMonth(1) to now
-            }
-            StatsPeriod.YEAR -> {
-                val daysCount = if (now.isLeapYear) 366 else 365
-                now.minusDays((daysCount - 1).toLong()) to now
-            }
-        }
-        val sessionMap = sessions.groupBy { session ->
-            Instant.ofEpochMilli(session.startedAt).atZone(zone).toLocalDate()
-        }
-        val result = mutableListOf<DailyStat>()
-        var current = start
-        while (!current.isAfter(end)) {
-            val minutes = sessionMap[current]?.sumOf { it.durationMinutes } ?: 0
-            result.add(DailyStat(current, minutes))
-            current = current.plusDays(1)
-        }
-        return result
-    }
-
     fun setPeriod(period: StatsPeriod) {
         selectedPeriod.value = period
     }
@@ -298,7 +155,6 @@ class MeditationViewModel(
     }
 
     private fun initSounds() {
-        val app = getApplication<Application>()
         soundPool = SoundPool.Builder().setMaxStreams(3).build()
         soundPool?.setOnLoadCompleteListener { _, _, _ ->
             loadedSoundsCount++
@@ -306,9 +162,9 @@ class MeditationViewModel(
                 _soundsReady.value = true
             }
         }
-        soundMap["meditation_start"] = soundPool!!.load(app, R.raw.meditation_start, 1)
-        soundMap["meditation_end"] = soundPool!!.load(app, R.raw.meditation_end, 1)
-        soundMap["meditation_checkpoint"] = soundPool!!.load(app, R.raw.meditation_checkpoint, 1)
+        soundMap["meditation_start"] = soundPool!!.load(application, R.raw.meditation_start, 1)
+        soundMap["meditation_end"] = soundPool!!.load(application, R.raw.meditation_end, 1)
+        soundMap["meditation_checkpoint"] = soundPool!!.load(application, R.raw.meditation_checkpoint, 1)
     }
 
     private fun playSound(soundName: String?) {
