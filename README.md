@@ -37,4 +37,4 @@ The app provides a palette of 20 Material Design colors that can be assigned to 
 
 ## License
 
-This project is licensed under the [Do What The Fuck You Want To Public License (WTFPL)](https://www.wtfpl.net/).
+This project is licensed under the [WTFPL](https://www.wtfpl.net/).
