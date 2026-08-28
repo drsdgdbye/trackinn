@@ -20,11 +20,25 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val ksPassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
+            val kPassword = System.getenv("KEY_PASSWORD") ?: ""
+            val ksFile = rootProject.file("trackinn.jks")
+
+            if (ksPassword.isNotEmpty() && ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = ksPassword
+                keyAlias = System.getenv("KEY_ALIAS") ?: "trackinn"
+                keyPassword = kPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
