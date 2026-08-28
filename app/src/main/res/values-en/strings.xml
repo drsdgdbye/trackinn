@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TrackInn</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="close">Close</string>
+    <string name="create">Create</string>
+    <string name="add">Add</string>
+    <string name="clear">Clear</string>
+    <string name="settings">Settings</string>
+
+    <!-- TrackinnApp -->
+    <string name="app_title">TrackInn</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_todo">Tasks</string>
+    <string name="nav_calories">Calories</string>
+    <string name="nav_meditation">Meditation</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_modules">Modules</string>
+    <string name="settings_general">General</string>
+    <string name="settings_todo">Tasks</string>
+    <string name="settings_calories">Calorie Tracker</string>
+    <string name="settings_data">Data</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version: 1.0</string>
+
+    <string name="module_todo">Tasks</string>
+    <string name="module_calories">Calories</string>
+    <string name="module_meditation">Meditation</string>
+
+    <string name="theme_label">Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
+
+    <string name="language_label">Language</string>
+    <string name="language_system">System</string>
+    <string name="language_ru">Русский</string>
+    <string name="language_en">English</string>
+
+    <string name="color_completed">Completed color</string>
+    <string name="color_no_deadline">No deadline color</string>
+    <string name="color_deadline_start">Deadline color (start)</string>
+    <string name="color_deadline_critical">Deadline color (critical)</string>
+    <string name="daily_goal">Daily goal (kcal)</string>
+    <string name="color_progress">Progress color</string>
+    <string name="color_approaching">Approaching color</string>
+    <string name="color_exceeding">Exceeding color</string>
+
+    <string name="export_json">Export to JSON</string>
+    <string name="import_json">Import from JSON</string>
+    <string name="import_products">Import products from JSON</string>
+    <string name="export_copied">JSON copied to clipboard</string>
+    <string name="export_error">Export error: %s</string>
+    <string name="import_done">Import completed</string>
+    <string name="import_error">Import error: %s</string>
+    <string name="import_read_error">File read error</string>
+    <string name="import_products_done">Imported %d products</string>
+
+    <string name="pick_color">Pick a color</string>
+    <string name="pick_color_confirm">Select</string>
+
+    <!-- Todo -->
+    <string name="todo_add">Add task</string>
+    <string name="task_new">New task</string>
+    <string name="task_edit">Edit task</string>
+    <string name="task_title">Title</string>
+    <string name="task_date">Date: </string>
+    <string name="task_time">Time: </string>
+    <string name="task_select_date">Select date</string>
+    <string name="task_select_time">Select time</string>
+    <string name="task_add_to_calendar">Add to Google Calendar</string>
+    <string name="task_delete">Delete task</string>
+
+    <!-- Calorie -->
+    <string name="meal_breakfast">Breakfast</string>
+    <string name="meal_lunch">Lunch</string>
+    <string name="meal_snack">Snack</string>
+    <string name="meal_dinner">Dinner</string>
+    <string name="calories_format">%1$d / %2$d kcal</string>
+
+    <string name="add_to_meal">Add to %s</string>
+    <string name="search_product">Search product or dish…</string>
+    <string name="weight_gram">Weight (g)</string>
+    <string name="calories_per_100g">%d kcal/100g</string>
+    <string name="composite_dish">Composite dish</string>
+    <string name="approx_calories">~%d kcal</string>
+    <string name="create_new_product">Create new product</string>
+    <string name="new_product">New product</string>
+    <string name="product_name">Name</string>
+    <string name="calories_per_100g_label">Calories per 100g</string>
+    <string name="protein_per_100g">Protein per 100g</string>
+    <string name="fat_per_100g">Fat per 100g</string>
+    <string name="carbs_per_100g">Carbs per 100g</string>
+
+    <!-- Dishes -->
+    <string name="dishes">Dishes</string>
+    <string name="add_dish">Add dish</string>
+    <string name="search_dish">Search dish…</string>
+    <string name="filter_all">All</string>
+    <string name="no_dishes">No dishes</string>
+    <string name="no_dishes_hint">Tap + to add</string>
+
+    <string name="edit_dish">Edit dish</string>
+    <string name="new_dish">New dish</string>
+    <string name="dish_name">Dish name</string>
+    <string name="dish_type">Dish type</string>
+    <string name="dish_weight">Cooked weight (g)</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="search_product_hint">Search product…</string>
+    <string name="create_product_format">Create product "%s"</string>
+    <string name="gram_short">g</string>
+    <string name="delete_dish">Delete dish?</string>
+    <string name="delete_dish_confirm">This action cannot be undone.</string>
+    <string name="calories_short">%d kcal</string>
+    <string name="protein_short">P:%d</string>
+    <string name="fat_short">F:%d</string>
+    <string name="carbs_short">C:%d</string>
+
+    <string name="dish_type_soup">Soup</string>
+    <string name="dish_type_main">Main</string>
+    <string name="dish_type_side">Side</string>
+    <string name="dish_type_salad">Salad</string>
+    <string name="dish_type_dessert">Dessert</string>
+    <string name="dish_type_snack">Snack</string>
+    <string name="dish_type_drink">Drink</string>
+    <string name="dish_type_other">Other</string>
+
+    <!-- Meditation -->
+    <string name="meditation">Meditation</string>
+    <string name="add_timer">Add timer</string>
+    <string name="timer_minutes_format">%d min</string>
+    <string name="checkpoints_format"> · checkpoints: %s</string>
+    <string name="timer_start">Start</string>
+    <string name="timer_delete">Delete</string>
+
+    <string name="timer_new">New timer</string>
+    <string name="timer_edit">Edit timer</string>
+    <string name="timer_name">Name</string>
+    <string name="timer_total_minutes">Total time (minutes)</string>
+    <string name="timer_prep_seconds">Preparation (seconds)</string>
+    <string name="timer_checkpoints">Checkpoint minutes (comma-separated)</string>
+    <string name="timer_delete_label">Delete timer</string>
+    <string name="timer_prep">Preparing…</string>
+    <string name="timer_done">Done!</string>
+    <string name="timer_loading">Loading…</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_resume">Resume</string>
+    <string name="timer_stop">Stop</string>
+
+    <string name="sound_start">Start sound</string>
+    <string name="sound_end">End sound</string>
+    <string name="sound_checkpoint">Checkpoint sound</string>
+
+    <string name="error_enter_name">Enter a name</string>
+    <string name="error_min_time">Minimum time is 5 minutes</string>
+    <string name="error_checkpoints_integers">Checkpoints must be integers</string>
+    <string name="error_checkpoints_range">Checkpoints %1$s out of range (1–%2$d)</string>
+    <string name="unit_label">Unit:</string>
+    <string name="unit_grams">Grams</string>
+    <string name="unit_ml">Milliliters</string>
+    <string name="per_100_label">Per 100g/ml:</string>
+    <string name="calories_label">Calories</string>
+    <string name="protein_short_label">Protein (g)</string>
+    <string name="fat_short_label">Fat (g)</string>
+    <string name="carbs_short_label">Carbs (g)</string>
+    <string name="category_optional">Category (optional)</string>
+    <string name="save_and_add">Save and add</string>
+    <string name="table_name">Name</string>
+    <string name="table_weight">Weight (g)</string>
+    <string name="table_kcal">kcal</string>
+    <string name="no_entries">No entries</string>
+    <string name="save_changes_title">Save changes?</string>
+    <string name="save_changes_message">Apply changes to the dish before leaving?</string>
+    <string name="save_and_exit">Save and exit</string>
+    <string name="discard_changes">Discard changes</string>
+    <string name="error_dish_name_exists">A dish with this name already exists</string>
+    <string name="meditation_history">Meditation History</string>
+    <string name="date_from">From:</string>
+    <string name="date_to">To:</string>
+    <string name="duration_minutes">%d min</string>
+    <string name="completed">Completed</string>
+    <string name="interrupted">Interrupted</string>
+    <string name="no_sessions">No sessions</string>
+</resources>

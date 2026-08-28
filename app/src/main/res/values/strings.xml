@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TrackInn</string>
+
+    <!-- Common -->
+    <string name="back">Назад</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="close">Закрыть</string>
+    <string name="create">Создать</string>
+    <string name="add">Добавить</string>
+    <string name="clear">Очистить</string>
+    <string name="settings">Настройки</string>
+
+    <!-- TrackinnApp -->
+    <string name="app_title">TrackInn</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_todo">Задачи</string>
+    <string name="nav_calories">Калории</string>
+    <string name="nav_meditation">Медитация</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_modules">Модули</string>
+    <string name="settings_general">Общее</string>
+    <string name="settings_todo">Задачи</string>
+    <string name="settings_calories">Трекер калорий</string>
+    <string name="settings_data">Данные</string>
+    <string name="settings_about">О приложении</string>
+    <string name="settings_version">Версия: 1.0</string>
+
+    <string name="module_todo">Задачи</string>
+    <string name="module_calories">Калории</string>
+    <string name="module_meditation">Медитация</string>
+
+    <string name="theme_label">Тема</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_system">Системная</string>
+
+    <string name="language_label">Язык</string>
+    <string name="language_system">Системный</string>
+    <string name="language_ru">Русский</string>
+    <string name="language_en">English</string>
+
+    <string name="color_completed">Цвет выполненных</string>
+    <string name="color_no_deadline">Цвет без дедлайна</string>
+    <string name="color_deadline_start">Цвет дедлайн (начало)</string>
+    <string name="color_deadline_critical">Цвет дедлайн (критично)</string>
+    <string name="daily_goal">Дневная цель (ккал)</string>
+    <string name="color_progress">Цвет прогресса</string>
+    <string name="color_approaching">Цвет приближения</string>
+    <string name="color_exceeding">Цвет превышения</string>
+
+    <string name="export_json">Экспорт в JSON</string>
+    <string name="import_json">Импорт из JSON</string>
+    <string name="import_products">Импорт продуктов из JSON</string>
+    <string name="export_copied">JSON скопирован в буфер обмена</string>
+    <string name="export_error">Ошибка экспорта: %s</string>
+    <string name="import_done">Импорт завершён</string>
+    <string name="import_error">Ошибка импорта: %s</string>
+    <string name="import_read_error">Ошибка чтения файла</string>
+    <string name="import_products_done">Импортировано %d продуктов</string>
+
+    <string name="pick_color">Выберите цвет</string>
+    <string name="pick_color_confirm">Выбрать</string>
+
+    <!-- Todo -->
+    <string name="todo_add">Добавить задачу</string>
+    <string name="task_new">Новая задача</string>
+    <string name="task_edit">Редактирование</string>
+    <string name="task_title">Название</string>
+    <string name="task_date">Дата: </string>
+    <string name="task_time">Время: </string>
+    <string name="task_select_date">Выбрать дату</string>
+    <string name="task_select_time">Выбрать время</string>
+    <string name="task_add_to_calendar">Добавить в Google Calendar</string>
+    <string name="task_delete">Удалить задачу</string>
+
+    <!-- Calorie -->
+    <string name="meal_breakfast">Завтрак</string>
+    <string name="meal_lunch">Обед</string>
+    <string name="meal_snack">Перекус</string>
+    <string name="meal_dinner">Ужин</string>
+    <string name="calories_format">%1$d / %2$d ккал</string>
+
+    <string name="add_to_meal">Добавить в %s</string>
+    <string name="search_product">Поиск продукта или блюда…</string>
+    <string name="weight_gram">Вес (г)</string>
+    <string name="calories_per_100g">%d ккал/100г</string>
+    <string name="composite_dish">Составное блюдо</string>
+    <string name="approx_calories">~%d ккал</string>
+    <string name="create_new_product">Создать новый продукт</string>
+    <string name="new_product">Новый продукт</string>
+    <string name="product_name">Название</string>
+    <string name="calories_per_100g_label">Калории на 100г</string>
+    <string name="protein_per_100g">Белки на 100г</string>
+    <string name="fat_per_100g">Жиры на 100г</string>
+    <string name="carbs_per_100g">Углеводы на 100г</string>
+
+    <!-- Dishes -->
+    <string name="dishes">Блюда</string>
+    <string name="add_dish">Добавить блюдо</string>
+    <string name="search_dish">Поиск блюда…</string>
+    <string name="filter_all">Все</string>
+    <string name="no_dishes">Нет блюд</string>
+    <string name="no_dishes_hint">Нажмите + чтобы добавить</string>
+
+    <string name="edit_dish">Редактировать блюдо</string>
+    <string name="new_dish">Новое блюдо</string>
+    <string name="dish_name">Название блюда</string>
+    <string name="dish_type">Тип блюда</string>
+    <string name="dish_weight">Вес готового блюда (г)</string>
+    <string name="ingredients">Ингредиенты</string>
+    <string name="search_product_hint">Поиск продукта…</string>
+    <string name="create_product_format">Создать продукт "%s"</string>
+    <string name="gram_short">г</string>
+    <string name="delete_dish">Удалить блюдо?</string>
+    <string name="delete_dish_confirm">Это действие нельзя отменить.</string>
+    <string name="calories_short">%d ккал</string>
+    <string name="protein_short">Б:%d</string>
+    <string name="fat_short">Ж:%d</string>
+    <string name="carbs_short">У:%d</string>
+
+    <string name="dish_type_soup">Суп</string>
+    <string name="dish_type_main">Основное</string>
+    <string name="dish_type_side">Гарнир</string>
+    <string name="dish_type_salad">Салат</string>
+    <string name="dish_type_dessert">Десерт</string>
+    <string name="dish_type_snack">Перекус</string>
+    <string name="dish_type_drink">Напиток</string>
+    <string name="dish_type_other">Другое</string>
+
+    <!-- Meditation -->
+    <string name="meditation">Медитация</string>
+    <string name="add_timer">Добавить таймер</string>
+    <string name="timer_minutes_format">%d мин</string>
+    <string name="checkpoints_format"> · чекпоинты: %s</string>
+    <string name="timer_start">Запустить</string>
+    <string name="timer_delete">Удалить</string>
+
+    <string name="timer_new">Новый таймер</string>
+    <string name="timer_edit">Редактирование таймера</string>
+    <string name="timer_name">Название</string>
+    <string name="timer_total_minutes">Общее время (минуты)</string>
+    <string name="timer_prep_seconds">Подготовка (секунды)</string>
+    <string name="timer_checkpoints">Контрольные точки в минутах (через запятую)</string>
+    <string name="timer_delete_label">Удалить таймер</string>
+    <string name="timer_prep">Подготовка…</string>
+    <string name="timer_done">Готово!</string>
+    <string name="timer_loading">Загрузка…</string>
+    <string name="timer_pause">Пауза</string>
+    <string name="timer_resume">Продолжить</string>
+    <string name="timer_stop">Стоп</string>
+
+    <string name="sound_start">Звук начала</string>
+    <string name="sound_end">Звук окончания</string>
+    <string name="sound_checkpoint">Звук чекпоинтов</string>
+
+    <string name="error_enter_name">Введите название</string>
+    <string name="error_min_time">Минимальное время — 5 минут</string>
+    <string name="error_checkpoints_integers">Контрольные точки должны быть целыми числами</string>
+    <string name="error_checkpoints_range">Чекпоинты %1$s вне диапазона (1–%2$d)</string>
+    <string name="unit_label">Единица измерения:</string>
+    <string name="unit_grams">Граммы</string>
+    <string name="unit_ml">Миллилитры</string>
+    <string name="per_100_label">На 100г/мл:</string>
+    <string name="calories_label">Калории</string>
+    <string name="protein_short_label">Белки (г)</string>
+    <string name="fat_short_label">Жиры (г)</string>
+    <string name="carbs_short_label">Углеводы (г)</string>
+    <string name="category_optional">Категория (необязательно)</string>
+    <string name="save_and_add">Сохранить и добавить</string>
+    <string name="table_name">Название</string>
+    <string name="table_weight">Вес (г)</string>
+    <string name="table_kcal">Ккал</string>
+    <string name="no_entries">Нет записей</string>
+    <string name="save_changes_title">Сохранить изменения?</string>
+    <string name="save_changes_message">Внести изменения в блюдо перед выходом?</string>
+    <string name="save_and_exit">Сохранить и выйти</string>
+    <string name="discard_changes">Не сохранять</string>
+    <string name="error_dish_name_exists">Блюдо с таким названием уже существует</string>
+    <string name="meditation_history">История медитации</string>
+    <string name="date_from">От:</string>
+    <string name="date_to">До:</string>
+    <string name="duration_minutes">%d мин</string>
+    <string name="completed">Выполнено</string>
+    <string name="interrupted">Прервано</string>
+    <string name="no_sessions">Нет сессий</string>
+</resources>
