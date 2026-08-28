@@ -1,6 +1,7 @@
 package pro.drsdgdbye.trackinn.data.db.dao
 
 import androidx.room.Dao
+import androidx.room.Embedded
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -15,10 +16,18 @@ data class MealWithItems(
     val items: List<MealItemEntity>
 )
 
+data class MealItemWithDate(
+    @Embedded val item: MealItemEntity,
+    val date: Long
+)
+
 @Dao
 interface MealDao {
     @Query("SELECT * FROM meals ORDER BY date ASC, type ASC")
     fun getAll(): Flow<List<MealEntity>>
+
+    @Query("SELECT meal_items.*, meals.date AS date FROM meal_items INNER JOIN meals ON meal_items.mealId = meals.id ORDER BY meals.date ASC, meal_items.id ASC")
+    fun getAllItemsWithDate(): Flow<List<MealItemWithDate>>
 
     @Query("SELECT * FROM meals WHERE date = :date ORDER BY type ASC")
     fun getMealsByDate(date: Long): Flow<List<MealEntity>>

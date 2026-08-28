@@ -1,4 +1,4 @@
-package pro.drsdgdbye.trackinn.ui.meditation
+package pro.drsdgdbye.trackinn.ui.calorie
 
 import android.app.DatePickerDialog
 import android.content.Context
@@ -26,9 +26,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -67,9 +67,7 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
-import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
 import pro.drsdgdbye.trackinn.R
-import pro.drsdgdbye.trackinn.data.db.entity.MeditationSessionEntity
 import pro.drsdgdbye.trackinn.ui.stats.StatsPeriod
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
@@ -83,15 +81,16 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MeditationHistoryScreen(
+fun CalorieHistoryScreen(
     onBack: () -> Unit,
-    viewModel: MeditationViewModel
+    viewModel: CalorieHistoryViewModel
 ) {
     val dashboardStats by viewModel.dashboardStats.collectAsState()
     val weeklyStats by viewModel.weeklyStats.collectAsState()
     val dailyStats by viewModel.dailyStats.collectAsState()
-    val filteredSessions by viewModel.filteredSessions.collectAsState()
+    val filteredDays by viewModel.filteredDays.collectAsState()
     val selectedPeriod by viewModel.selectedPeriod.collectAsState()
+    val caloriesDailyGoal by viewModel.caloriesDailyGoal.collectAsState()
 
     val context = LocalContext.current
     val activityContext = (LocalActivityResultRegistryOwner.current as? Context) ?: context
@@ -100,7 +99,7 @@ fun MeditationHistoryScreen(
     var endDate by remember { mutableStateOf<Long?>(null) }
 
     val dateFormat = remember { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()) }
-    val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    val dayFormat = remember { java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy") }
 
     val periods = listOf(StatsPeriod.WEEK, StatsPeriod.MONTH, StatsPeriod.YEAR)
     val periodLabels = listOf(
@@ -117,7 +116,7 @@ fun MeditationHistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.meditation_history)) },
+                title = { Text(stringResource(R.string.calorie_history)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -132,7 +131,6 @@ fun MeditationHistoryScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // Tabs
             item {
                 PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
                     periodLabels.forEachIndexed { index, label ->
@@ -146,23 +144,21 @@ fun MeditationHistoryScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Dashboard
             item {
                 DashboardSummary(stats = dashboardStats)
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Bar chart
             item {
                 val configuration = LocalConfiguration.current
                 val chartLocale = configuration.locales[0]
                 if (selectedPeriod == StatsPeriod.WEEK) {
                     if (dailyStats.isNotEmpty()) {
-                        WeeklyBarChart(
+                        CalorieBarChart(
                             labels = dailyStats.map {
                                 it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, chartLocale)
                             },
-                            values = dailyStats.map { it.totalMinutes }
+                            values = dailyStats.map { it.calories }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -175,21 +171,19 @@ fun MeditationHistoryScreen(
                             }
                             else -> emptyList()
                         }
-                        WeeklyBarChart(labels = labels, values = weeklyStats.map { it.totalMinutes })
+                        CalorieBarChart(labels = labels, values = weeklyStats.map { it.totalCalories })
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
 
-            // Heatmap calendar
             item {
                 if (dailyStats.isNotEmpty()) {
-                    HeatmapCalendar(dailyStats = dailyStats)
+                    CalorieHeatmap(dailyStats = dailyStats, goal = caloriesDailyGoal)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
 
-            // Date filter
             item {
                 DateFilterRow(
                     startDate = startDate,
@@ -208,19 +202,18 @@ fun MeditationHistoryScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Sessions
-            if (filteredSessions.isEmpty()) {
+            if (filteredDays.isEmpty()) {
                 item {
                     Text(
-                        stringResource(R.string.no_sessions),
+                        stringResource(R.string.no_entries),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 16.dp)
                     )
                 }
             } else {
-                items(filteredSessions) { session ->
-                    SessionItem(session = session, dateFormat = dateFormat, timeFormat = timeFormat)
+                items(filteredDays) { day ->
+                    DayItem(day = day, dateFormat = dayFormat)
                 }
             }
 
@@ -238,14 +231,8 @@ private fun DashboardSummary(stats: DashboardStats) {
         StatCard(
             modifier = Modifier.weight(1f),
             icon = Icons.Default.Schedule,
-            label = stringResource(R.string.stat_total_sessions),
-            value = stats.totalSessions.toString()
-        )
-        StatCard(
-            modifier = Modifier.weight(1f),
-            icon = Icons.AutoMirrored.Filled.TrendingUp,
-            label = stringResource(R.string.stat_total_time),
-            value = formatMinutes(stats.totalMinutes)
+            label = stringResource(R.string.stat_avg_calories),
+            value = stats.averageCalories.toString()
         )
         StatCard(
             modifier = Modifier.weight(1f),
@@ -255,9 +242,15 @@ private fun DashboardSummary(stats: DashboardStats) {
         )
         StatCard(
             modifier = Modifier.weight(1f),
+            icon = Icons.Default.CalendarMonth,
+            label = stringResource(R.string.stat_days_logged),
+            value = stringResource(R.string.stat_days_fraction, stats.daysLogged, stats.daysTotal)
+        )
+        StatCard(
+            modifier = Modifier.weight(1f),
             icon = Icons.Default.CheckCircle,
-            label = stringResource(R.string.stat_completion),
-            value = stringResource(R.string.stat_percent, stats.completionRate)
+            label = stringResource(R.string.stat_goal_days),
+            value = stringResource(R.string.stat_percent, stats.validDaysPercent)
         )
     }
 }
@@ -265,7 +258,7 @@ private fun DashboardSummary(stats: DashboardStats) {
 @Composable
 private fun StatCard(
     modifier: Modifier = Modifier,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     value: String
 ) {
@@ -307,7 +300,7 @@ private fun StatCard(
 }
 
 @Composable
-private fun WeeklyBarChart(labels: List<String>, values: List<Int>) {
+private fun CalorieBarChart(labels: List<String>, values: List<Int>) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
     LaunchedEffect(values) {
@@ -327,7 +320,7 @@ private fun WeeklyBarChart(labels: List<String>, values: List<Int>) {
 
     Column {
         Text(
-            text = stringResource(R.string.stat_total_time),
+            text = stringResource(R.string.stat_calories_title),
             style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -346,7 +339,7 @@ private fun WeeklyBarChart(labels: List<String>, values: List<Int>) {
 }
 
 @Composable
-private fun HeatmapCalendar(dailyStats: List<DailyStat>) {
+private fun CalorieHeatmap(dailyStats: List<DailyStat>, goal: Int) {
     val today = LocalDate.now()
     val firstDay = dailyStats.firstOrNull()?.date ?: today
     val weeks = mutableListOf<List<DailyStat>>()
@@ -364,16 +357,15 @@ private fun HeatmapCalendar(dailyStats: List<DailyStat>) {
     }
 
     val heatmapColors = listOf(
-        Color(0xFFebedf0),
-        Color(0xFF9be9a8),
-        Color(0xFF40c463),
-        Color(0xFF30a14e),
-        Color(0xFF216e39)
+        Color(0xFFEBEDF0),
+        Color(0xFF4CAF50),
+        Color(0xFFFFC107),
+        Color(0xFFF44336)
     )
 
     Column {
         Text(
-            text = stringResource(R.string.meditation_history),
+            text = stringResource(R.string.calorie_history),
             style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -386,18 +378,12 @@ private fun HeatmapCalendar(dailyStats: List<DailyStat>) {
             weeks.forEach { week ->
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     week.forEach { day ->
-                        val intensity = when {
-                            day.totalMinutes <= 0 -> 0
-                            day.totalMinutes <= 10 -> 1
-                            day.totalMinutes <= 20 -> 2
-                            day.totalMinutes <= 30 -> 3
-                            else -> 4
-                        }
+                        val level = CalorieStats.heatmapLevel(day.calories, goal)
                         Box(
                             modifier = Modifier
                                 .size(14.dp)
                                 .clip(RoundedCornerShape(2.dp))
-                                .background(heatmapColors[intensity])
+                                .background(heatmapColors[level])
                         )
                     }
                 }
@@ -410,7 +396,7 @@ private fun HeatmapCalendar(dailyStats: List<DailyStat>) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "0",
+                text = stringResource(R.string.heatmap_legend_min),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 9.sp
@@ -426,7 +412,7 @@ private fun HeatmapCalendar(dailyStats: List<DailyStat>) {
                 Spacer(modifier = Modifier.width(2.dp))
             }
             Text(
-                text = "40+",
+                text = stringResource(R.string.heatmap_legend_max),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 9.sp
@@ -493,11 +479,7 @@ private fun DateFilterRow(
 }
 
 @Composable
-private fun SessionItem(
-    session: MeditationSessionEntity,
-    dateFormat: SimpleDateFormat,
-    timeFormat: SimpleDateFormat
-) {
+private fun DayItem(day: DaySummary, dateFormat: java.time.format.DateTimeFormatter) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -513,40 +495,23 @@ private fun SessionItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = if (session.wasCompleted) Icons.Default.CheckCircle else Icons.Default.Close,
-                contentDescription = null,
-                tint = if (session.wasCompleted) Color(0xFF4CAF50) else Color(0xFFF44336),
+                imageVector = if (day.goalMet) Icons.Default.CheckCircle else Icons.Default.Close,
+                contentDescription = stringResource(if (day.goalMet) R.string.goal_met else R.string.goal_missed),
+                tint = if (day.goalMet) Color(0xFF4CAF50) else Color(0xFFF44336),
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = dateFormat.format(Date(session.startedAt)),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = timeFormat.format(Date(session.startedAt)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
             Text(
-                text = stringResource(R.string.duration_minutes, session.durationMinutes),
+                text = day.date.format(dateFormat),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = stringResource(R.string.calories_format, day.calories, day.goal),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium
             )
         }
-    }
-}
-
-@Composable
-private fun formatMinutes(totalMinutes: Int): String {
-    val hours = totalMinutes / 60
-    val minutes = totalMinutes % 60
-    return if (hours > 0) {
-        stringResource(R.string.stat_hours, hours, minutes)
-    } else {
-        stringResource(R.string.stat_minutes, minutes)
     }
 }
 

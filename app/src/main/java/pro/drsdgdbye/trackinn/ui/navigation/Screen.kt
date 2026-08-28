@@ -15,6 +15,7 @@ sealed class Screen(val route: String) {
         fun createRoute(taskId: Long? = null) = if (taskId != null) "task_detail?taskId=$taskId" else "task_detail"
     }
     data object Calorie : Screen("calorie")
+    data object CalorieHistory : Screen("calorie_history")
     data object AddMeal : Screen("add_meal?mealType={mealType}&date={date}") {
         fun createRoute(mealType: String, date: Long) = "add_meal?mealType=$mealType&date=$date"
     }

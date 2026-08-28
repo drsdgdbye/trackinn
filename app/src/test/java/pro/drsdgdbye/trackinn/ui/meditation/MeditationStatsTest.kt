@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pro.drsdgdbye.trackinn.data.db.entity.MeditationSessionEntity
+import pro.drsdgdbye.trackinn.ui.stats.StatsPeriod
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime

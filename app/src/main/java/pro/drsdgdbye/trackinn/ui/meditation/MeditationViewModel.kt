@@ -21,6 +21,7 @@ import pro.drsdgdbye.trackinn.data.db.entity.MeditationSessionEntity
 import pro.drsdgdbye.trackinn.data.db.entity.SavedTimerEntity
 import pro.drsdgdbye.trackinn.data.di.appContainer
 import pro.drsdgdbye.trackinn.data.repository.SavedTimerRepository
+import pro.drsdgdbye.trackinn.ui.stats.StatsPeriod
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -30,8 +31,6 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 enum class TimerState { IDLE, PREP, RUNNING, PAUSED, COMPLETED }
-
-enum class StatsPeriod { WEEK, MONTH, YEAR }
 
 data class TimerUiState(
     val state: TimerState = TimerState.IDLE,

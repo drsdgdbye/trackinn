@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +29,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,6 +57,7 @@ import java.util.Locale
 fun CalorieScreen(
     onAddMealClick: (mealType: String, date: Long) -> Unit = { _, _ -> },
     onDishListClick: () -> Unit = {},
+    onHistoryClick: () -> Unit = {},
     viewModel: CalorieViewModel = viewModel()
 ) {
     val meals by viewModel.meals.collectAsState()
@@ -81,6 +84,16 @@ fun CalorieScreen(
     var editingItem by remember { mutableStateOf<MealItemEntity?>(null) }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.calories_label)) },
+                actions = {
+                    IconButton(onClick = onHistoryClick) {
+                        Icon(Icons.Default.BarChart, contentDescription = stringResource(R.string.calorie_history))
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onDishListClick) {
                 Icon(Icons.Default.Restaurant, contentDescription = stringResource(R.string.dishes))

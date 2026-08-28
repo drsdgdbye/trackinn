@@ -60,7 +60,7 @@ fun AddMealScreen(
     onBack: () -> Unit,
     onItemAdded: () -> Unit,
     viewModel: AddMealViewModel = viewModel(),
-    productSearchViewModel: ProductSearchViewModel = viewModel()
+    productSearchViewModel: ProductSearchViewModel = viewModel(factory = ProductSearchViewModel.Factory)
 ) {
     val searchResults by viewModel.searchResults.collectAsState()
     var weight by remember { mutableStateOf("") }

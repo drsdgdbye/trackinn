@@ -25,6 +25,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import pro.drsdgdbye.trackinn.ui.calorie.AddMealScreen
 import pro.drsdgdbye.trackinn.ui.calorie.AddMealViewModel
+import pro.drsdgdbye.trackinn.ui.calorie.CalorieHistoryScreen
+import pro.drsdgdbye.trackinn.ui.calorie.CalorieHistoryViewModel
 import pro.drsdgdbye.trackinn.ui.calorie.CalorieScreen
 import pro.drsdgdbye.trackinn.ui.calorie.CalorieViewModel
 import pro.drsdgdbye.trackinn.ui.calorie.DishEditorScreen
@@ -150,7 +152,17 @@ fun TrackinnRoot() {
                     onDishListClick = {
                         navController.navigate(Screen.DishList.route)
                     },
+                    onHistoryClick = {
+                        navController.navigate(Screen.CalorieHistory.route)
+                    },
                     viewModel = calorieViewModel
+                )
+            }
+            composable(Screen.CalorieHistory.route) {
+                val calorieHistoryViewModel: CalorieHistoryViewModel = viewModel(factory = CalorieHistoryViewModel.Factory)
+                CalorieHistoryScreen(
+                    onBack = { navController.popBackStack() },
+                    viewModel = calorieHistoryViewModel
                 )
             }
             composable(
