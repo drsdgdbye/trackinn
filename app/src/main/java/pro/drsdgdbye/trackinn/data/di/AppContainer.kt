@@ -7,6 +7,7 @@ import pro.drsdgdbye.trackinn.data.repository.MealRepository
 import pro.drsdgdbye.trackinn.data.repository.ProductRepository
 import pro.drsdgdbye.trackinn.data.repository.SavedTimerRepository
 import pro.drsdgdbye.trackinn.data.repository.TaskRepository
+import pro.drsdgdbye.trackinn.data.repository.WeightEntryRepository
 import pro.drsdgdbye.trackinn.data.settings.SettingsRepository
 
 class AppContainer(context: Context) {
@@ -28,5 +29,9 @@ class AppContainer(context: Context) {
 
     val savedTimerRepository: SavedTimerRepository by lazy {
         SavedTimerRepository(db.savedTimerDao(), db.meditationSessionDao())
+    }
+
+    val weightEntryRepository: WeightEntryRepository by lazy {
+        WeightEntryRepository(db.weightEntryDao())
     }
 }

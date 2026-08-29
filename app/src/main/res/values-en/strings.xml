@@ -20,6 +20,7 @@
     <string name="nav_todo">Tasks</string>
     <string name="nav_calories">Calories</string>
     <string name="nav_meditation">Meditation</string>
+    <string name="nav_weight">Weight</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
@@ -34,6 +35,7 @@
     <string name="module_todo">Tasks</string>
     <string name="module_calories">Calories</string>
     <string name="module_meditation">Meditation</string>
+    <string name="module_weight">Weight</string>
 
     <string name="theme_label">Theme</string>
     <string name="theme_light">Light</string>
@@ -224,4 +226,30 @@
     <string name="heatmap_legend_max">100%+</string>
     <string name="goal_met">Goal reached</string>
     <string name="goal_missed">Goal not reached</string>
+
+    <!-- Weight -->
+    <string name="weight">Weight</string>
+    <string name="weight_history">Weight Statistics</string>
+    <string name="weight_input_label">Enter weight (kg)</string>
+    <string name="weight_value_kg">%s kg</string>
+    <string name="weight_add">Add</string>
+    <string name="weight_no_entries">No entries</string>
+    <string name="weight_remind_today">Today is weigh-in day!</string>
+    <string name="weight_remind_next">Next weigh-in: %s</string>
+    <string name="weight_remaining">Remaining: %s</string>
+    <string name="weight_target_reached">Target reached</string>
+    <string name="weight_chart_min_entries">Add at least 2 entries for the chart</string>
+    <string name="weight_target_label">Target</string>
+    <string name="settings_weight">Weight Tracker</string>
+    <string name="weight_target">Target weight (kg)</string>
+    <string name="weight_weigh_in_day">Weigh-in day</string>
+
+    <!-- Days of week -->
+    <string name="day_monday">Monday</string>
+    <string name="day_tuesday">Tuesday</string>
+    <string name="day_wednesday">Wednesday</string>
+    <string name="day_thursday">Thursday</string>
+    <string name="day_friday">Friday</string>
+    <string name="day_saturday">Saturday</string>
+    <string name="day_sunday">Sunday</string>
 </resources>

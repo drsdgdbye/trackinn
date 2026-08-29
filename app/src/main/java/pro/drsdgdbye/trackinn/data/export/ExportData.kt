@@ -8,6 +8,7 @@ import pro.drsdgdbye.trackinn.data.db.entity.MeditationSessionEntity
 import pro.drsdgdbye.trackinn.data.db.entity.ProductEntity
 import pro.drsdgdbye.trackinn.data.db.entity.SavedTimerEntity
 import pro.drsdgdbye.trackinn.data.db.entity.TaskEntity
+import pro.drsdgdbye.trackinn.data.db.entity.WeightEntryEntity
 
 data class ExportData(
     val version: Int = 1,
@@ -20,5 +21,6 @@ data class ExportData(
     val tasks: List<TaskEntity> = emptyList(),
     val savedTimers: List<SavedTimerEntity> = emptyList(),
     val meditationSessions: List<MeditationSessionEntity> = emptyList(),
+    val weightEntries: List<WeightEntryEntity> = emptyList(),
     val settings: Map<String, Any?> = emptyMap()
 )

@@ -35,6 +35,7 @@ class ExportImportManager(private val context: Context) {
         val tasks = db.taskDao().getAll().first()
         val savedTimers = db.savedTimerDao().getAll().first()
         val meditationSessions = db.meditationSessionDao().getAll().first()
+        val weightEntries = db.weightEntryDao().getAll().first()
 
         val settings = mapOf(
             "calories_daily_goal" to settingsRepository.caloriesDailyGoal.first(),
@@ -43,6 +44,9 @@ class ExportImportManager(private val context: Context) {
             "module_todo" to settingsRepository.moduleTodo.first(),
             "module_calories" to settingsRepository.moduleCalories.first(),
             "module_meditation" to settingsRepository.moduleMeditation.first(),
+            "module_weight" to settingsRepository.moduleWeight.first(),
+            "weight_target" to settingsRepository.weightTarget.first(),
+            "weight_weigh_in_day" to settingsRepository.weightWeighInDay.first(),
             "completed_task_color" to settingsRepository.completedTaskColor.first(),
             "deadline_safe_color" to settingsRepository.deadlineSafeColor.first(),
             "deadline_warning_color" to settingsRepository.deadlineWarningColor.first(),
@@ -61,6 +65,7 @@ class ExportImportManager(private val context: Context) {
             tasks = tasks,
             savedTimers = savedTimers,
             meditationSessions = meditationSessions,
+            weightEntries = weightEntries,
             settings = settings
         )
 
@@ -81,6 +86,7 @@ class ExportImportManager(private val context: Context) {
                 db.taskDao().deleteAll()
                 db.savedTimerDao().deleteAll()
                 db.meditationSessionDao().deleteAll()
+                db.weightEntryDao().deleteAll()
 
                 for (product in data.products) {
                     db.productDao().insert(product.copy(id = 0))
@@ -114,6 +120,9 @@ class ExportImportManager(private val context: Context) {
                 for (session in data.meditationSessions) {
                     db.meditationSessionDao().insert(session.copy(id = 0))
                 }
+                for (entry in data.weightEntries) {
+                    db.weightEntryDao().insert(entry.copy(id = 0))
+                }
             }
 
             data.settings["calories_daily_goal"]?.let {
@@ -133,6 +142,15 @@ class ExportImportManager(private val context: Context) {
             }
             data.settings["module_meditation"]?.let {
                 settingsRepository.setModuleEnabled("meditation", it as Boolean)
+            }
+            data.settings["module_weight"]?.let {
+                settingsRepository.setModuleEnabled("weight", it as Boolean)
+            }
+            data.settings["weight_target"]?.let {
+                settingsRepository.setWeightTarget((it as Number).toFloat())
+            }
+            data.settings["weight_weigh_in_day"]?.let {
+                settingsRepository.setWeightWeighInDay((it as Number).toInt())
             }
             data.settings["completed_task_color"]?.let {
                 settingsRepository.setColor(SettingsKeys.COMPLETED_TASK_COLOR, it as String)

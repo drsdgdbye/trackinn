@@ -12,6 +12,7 @@ import pro.drsdgdbye.trackinn.data.db.dao.MeditationSessionDao
 import pro.drsdgdbye.trackinn.data.db.dao.ProductDao
 import pro.drsdgdbye.trackinn.data.db.dao.SavedTimerDao
 import pro.drsdgdbye.trackinn.data.db.dao.TaskDao
+import pro.drsdgdbye.trackinn.data.db.dao.WeightEntryDao
 import pro.drsdgdbye.trackinn.data.db.entity.CompositeDishEntity
 import pro.drsdgdbye.trackinn.data.db.entity.CompositeDishIngredientEntity
 import pro.drsdgdbye.trackinn.data.db.entity.MealEntity
@@ -20,6 +21,7 @@ import pro.drsdgdbye.trackinn.data.db.entity.MeditationSessionEntity
 import pro.drsdgdbye.trackinn.data.db.entity.ProductEntity
 import pro.drsdgdbye.trackinn.data.db.entity.SavedTimerEntity
 import pro.drsdgdbye.trackinn.data.db.entity.TaskEntity
+import pro.drsdgdbye.trackinn.data.db.entity.WeightEntryEntity
 
 @Database(
     entities = [
@@ -30,9 +32,10 @@ import pro.drsdgdbye.trackinn.data.db.entity.TaskEntity
         MealEntity::class,
         MealItemEntity::class,
         MeditationSessionEntity::class,
-        SavedTimerEntity::class
+        SavedTimerEntity::class,
+        WeightEntryEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class TrackinnDatabase : RoomDatabase() {
@@ -42,6 +45,7 @@ abstract class TrackinnDatabase : RoomDatabase() {
     abstract fun mealDao(): MealDao
     abstract fun meditationSessionDao(): MeditationSessionDao
     abstract fun savedTimerDao(): SavedTimerDao
+    abstract fun weightEntryDao(): WeightEntryDao
 
     companion object {
         @Volatile
@@ -118,6 +122,17 @@ abstract class TrackinnDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE weight_entries (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "weightKg REAL NOT NULL, " +
+                        "recordedAt INTEGER NOT NULL)"
+                )
+            }
+        }
+
         fun getInstance(context: Context): TrackinnDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -125,7 +140,7 @@ abstract class TrackinnDatabase : RoomDatabase() {
                     TrackinnDatabase::class.java,
                     "trackinn.db"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build()
                 INSTANCE = instance
                 instance

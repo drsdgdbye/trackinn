@@ -20,6 +20,7 @@
     <string name="nav_todo">Задачи</string>
     <string name="nav_calories">Калории</string>
     <string name="nav_meditation">Медитация</string>
+    <string name="nav_weight">Вес</string>
 
     <!-- Settings -->
     <string name="settings_title">Настройки</string>
@@ -34,6 +35,7 @@
     <string name="module_todo">Задачи</string>
     <string name="module_calories">Калории</string>
     <string name="module_meditation">Медитация</string>
+    <string name="module_weight">Вес</string>
 
     <string name="theme_label">Тема</string>
     <string name="theme_light">Светлая</string>
@@ -224,4 +226,30 @@
     <string name="heatmap_legend_max">100%+</string>
     <string name="goal_met">Цель достигнута</string>
     <string name="goal_missed">Цель не достигнута</string>
+
+    <!-- Weight -->
+    <string name="weight">Вес</string>
+    <string name="weight_history">Статистика веса</string>
+    <string name="weight_input_label">Введите вес (кг)</string>
+    <string name="weight_value_kg">%s кг</string>
+    <string name="weight_add">Добавить</string>
+    <string name="weight_no_entries">Нет записей</string>
+    <string name="weight_remind_today">Сегодня день взвешивания!</string>
+    <string name="weight_remind_next">Следующее взвешивание: %s</string>
+    <string name="weight_remaining">До цели: %s</string>
+    <string name="weight_target_reached">Цель достигнута</string>
+    <string name="weight_chart_min_entries">Добавьте минимум 2 записи для графика</string>
+    <string name="weight_target_label">Цель</string>
+    <string name="settings_weight">Трекер веса</string>
+    <string name="weight_target">Целевой вес (кг)</string>
+    <string name="weight_weigh_in_day">День взвешивания</string>
+
+    <!-- Days of week -->
+    <string name="day_monday">Понедельник</string>
+    <string name="day_tuesday">Вторник</string>
+    <string name="day_wednesday">Среда</string>
+    <string name="day_thursday">Четверг</string>
+    <string name="day_friday">Пятница</string>
+    <string name="day_saturday">Суббота</string>
+    <string name="day_sunday">Воскресенье</string>
 </resources>

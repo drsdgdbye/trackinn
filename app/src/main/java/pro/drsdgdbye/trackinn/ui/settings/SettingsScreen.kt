@@ -52,6 +52,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.compose.ui.res.stringResource
@@ -135,9 +138,12 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
     val moduleTodo by settings.moduleTodo.collectAsState(initial = true)
     val moduleCalories by settings.moduleCalories.collectAsState(initial = true)
     val moduleMeditation by settings.moduleMeditation.collectAsState(initial = true)
+    val moduleWeight by settings.moduleWeight.collectAsState(initial = true)
     val theme by settings.theme.collectAsState(initial = ThemeMode.SYSTEM)
     val language by settings.language.collectAsState(initial = null)
     val caloriesDailyGoal by settings.caloriesDailyGoal.collectAsState(initial = 2000)
+    val weightTarget by settings.weightTarget.collectAsState(initial = 0f)
+    val weightWeighInDay by settings.weightWeighInDay.collectAsState(initial = java.util.Calendar.SUNDAY)
 
     val completedTaskColor by settings.completedTaskColor.collectAsState(initial = "#9E9E9E")
     val deadlineSafeColor by settings.deadlineSafeColor.collectAsState(initial = null)
@@ -173,6 +179,7 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
             ModuleToggle(stringResource(R.string.module_todo), moduleTodo) { scope.launch { settings.setModuleEnabled("todo", it) } }
             ModuleToggle(stringResource(R.string.module_calories), moduleCalories) { scope.launch { settings.setModuleEnabled("calories", it) } }
             ModuleToggle(stringResource(R.string.module_meditation), moduleMeditation) { scope.launch { settings.setModuleEnabled("meditation", it) } }
+            ModuleToggle(stringResource(R.string.module_weight), moduleWeight) { scope.launch { settings.setModuleEnabled("weight", it) } }
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(stringResource(R.string.settings_general))
@@ -218,6 +225,16 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 colorPickerTarget = pro.drsdgdbye.trackinn.data.settings.SettingsKeys.EXCEEDING_GOAL_COLOR
                 showColorPicker = true
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            SectionTitle(stringResource(R.string.settings_weight))
+            DecimalNumberSetting(stringResource(R.string.weight_target), weightTarget) {
+                scope.launch { settings.setWeightTarget(it) }
+            }
+            DayDropdown(
+                selectedDay = weightWeighInDay,
+                onDaySelected = { scope.launch { settings.setWeightWeighInDay(it) } }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(stringResource(R.string.settings_data))
@@ -399,6 +416,71 @@ private fun NumberSetting(label: String, value: Int, onChange: (Int) -> Unit) {
             },
             modifier = Modifier.width(100.dp)
         )
+    }
+}
+
+@Composable
+private fun DecimalNumberSetting(label: String, value: Float, onChange: (Float) -> Unit) {
+    var text by remember { mutableStateOf(value.toString()) }
+    LaunchedEffect(value) {
+        text = value.toString()
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, modifier = Modifier.weight(1f))
+        OutlinedTextField(
+            value = text,
+            onValueChange = {
+                text = it
+                it.replace(",", ".").toFloatOrNull()?.let(onChange)
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            modifier = Modifier.width(100.dp)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DayDropdown(selectedDay: Int, onDaySelected: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val days = listOf(
+        java.util.Calendar.MONDAY to R.string.day_monday,
+        java.util.Calendar.TUESDAY to R.string.day_tuesday,
+        java.util.Calendar.WEDNESDAY to R.string.day_wednesday,
+        java.util.Calendar.THURSDAY to R.string.day_thursday,
+        java.util.Calendar.FRIDAY to R.string.day_friday,
+        java.util.Calendar.SATURDAY to R.string.day_saturday,
+        java.util.Calendar.SUNDAY to R.string.day_sunday
+    )
+    val selectedLabel = days.firstOrNull { it.first == selectedDay }?.second ?: R.string.day_sunday
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        OutlinedTextField(
+            value = stringResource(selectedLabel),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.weight_weigh_in_day)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            days.forEach { (calendarDay, labelRes) ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(labelRes)) },
+                    onClick = {
+                        onDaySelected(calendarDay)
+                        expanded = false
+                    }
+                )
+            }
+        }
     }
 }
 

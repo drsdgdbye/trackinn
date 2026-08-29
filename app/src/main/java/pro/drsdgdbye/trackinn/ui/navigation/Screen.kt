@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import pro.drsdgdbye.trackinn.R
@@ -35,6 +36,8 @@ sealed class Screen(val route: String) {
         fun createRoute(timerId: Long) = "timer_running?timerId=$timerId"
     }
     data object MeditationHistory : Screen("meditation_history")
+    data object Weight : Screen("weight")
+    data object WeightHistory : Screen("weight_history")
     data object Settings : Screen("settings")
 }
 
@@ -48,5 +51,6 @@ data class BottomNavItem(
 fun bottomNavItems(): List<BottomNavItem> = listOf(
     BottomNavItem(Screen.Todo, R.string.nav_todo, Icons.Default.CheckCircle),
     BottomNavItem(Screen.Calorie, R.string.nav_calories, Icons.Default.LocalFireDepartment),
-    BottomNavItem(Screen.Meditation, R.string.nav_meditation, Icons.Default.SelfImprovement)
+    BottomNavItem(Screen.Meditation, R.string.nav_meditation, Icons.Default.SelfImprovement),
+    BottomNavItem(Screen.Weight, R.string.nav_weight, Icons.Default.MonitorWeight)
 )

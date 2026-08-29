@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -20,6 +21,10 @@ object SettingsKeys {
     val MODULE_TODO = booleanPreferencesKey("module_todo")
     val MODULE_CALORIES = booleanPreferencesKey("module_calories")
     val MODULE_MEDITATION = booleanPreferencesKey("module_meditation")
+
+    val WEIGHT_TARGET = floatPreferencesKey("weight_target")
+    val WEIGHT_WEIGH_IN_DAY = intPreferencesKey("weight_weigh_in_day")
+    val MODULE_WEIGHT = booleanPreferencesKey("module_weight")
 
     val COMPLETED_TASK_COLOR = stringPreferencesKey("completed_task_color")
     val DEADLINE_SAFE_COLOR = stringPreferencesKey("deadline_safe_color")
@@ -47,6 +52,10 @@ class SettingsRepository(private val context: Context) {
     val moduleTodo: Flow<Boolean> = context.dataStore.data.map { it[SettingsKeys.MODULE_TODO] ?: true }
     val moduleCalories: Flow<Boolean> = context.dataStore.data.map { it[SettingsKeys.MODULE_CALORIES] ?: true }
     val moduleMeditation: Flow<Boolean> = context.dataStore.data.map { it[SettingsKeys.MODULE_MEDITATION] ?: true }
+
+    val weightTarget: Flow<Float> = context.dataStore.data.map { it[SettingsKeys.WEIGHT_TARGET] ?: 0f }
+    val weightWeighInDay: Flow<Int> = context.dataStore.data.map { it[SettingsKeys.WEIGHT_WEIGH_IN_DAY] ?: java.util.Calendar.SUNDAY }
+    val moduleWeight: Flow<Boolean> = context.dataStore.data.map { it[SettingsKeys.MODULE_WEIGHT] ?: true }
 
     val completedTaskColor: Flow<String> = context.dataStore.data.map { it[SettingsKeys.COMPLETED_TASK_COLOR] ?: "#9E9E9E" }
     // null означает «цвет по умолчанию из темы» (контрастный к фону)
@@ -78,8 +87,17 @@ class SettingsRepository(private val context: Context) {
                 "todo" -> it[SettingsKeys.MODULE_TODO] = enabled
                 "calories" -> it[SettingsKeys.MODULE_CALORIES] = enabled
                 "meditation" -> it[SettingsKeys.MODULE_MEDITATION] = enabled
+                "weight" -> it[SettingsKeys.MODULE_WEIGHT] = enabled
             }
         }
+    }
+
+    suspend fun setWeightTarget(target: Float) {
+        context.dataStore.edit { it[SettingsKeys.WEIGHT_TARGET] = target }
+    }
+
+    suspend fun setWeightWeighInDay(day: Int) {
+        context.dataStore.edit { it[SettingsKeys.WEIGHT_WEIGH_IN_DAY] = day }
     }
 
     suspend fun setColor(key: Preferences.Key<String>, color: String) {

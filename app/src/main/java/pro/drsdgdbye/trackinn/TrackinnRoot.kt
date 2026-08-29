@@ -48,6 +48,9 @@ import pro.drsdgdbye.trackinn.ui.settings.SettingsScreen
 import pro.drsdgdbye.trackinn.ui.todo.TaskDetailScreen
 import pro.drsdgdbye.trackinn.ui.todo.TodoScreen
 import pro.drsdgdbye.trackinn.ui.todo.TodoViewModel
+import pro.drsdgdbye.trackinn.ui.weight.WeightScreen
+import pro.drsdgdbye.trackinn.ui.weight.WeightViewModel
+import pro.drsdgdbye.trackinn.ui.weight.WeightHistoryScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.res.stringResource
@@ -62,6 +65,7 @@ fun TrackinnRoot() {
     val moduleTodo by settingsRepository.moduleTodo.collectAsState(initial = true)
     val moduleCalories by settingsRepository.moduleCalories.collectAsState(initial = true)
     val moduleMeditation by settingsRepository.moduleMeditation.collectAsState(initial = true)
+    val moduleWeight by settingsRepository.moduleWeight.collectAsState(initial = true)
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -72,6 +76,7 @@ fun TrackinnRoot() {
             Screen.Todo -> moduleTodo
             Screen.Calorie -> moduleCalories
             Screen.Meditation -> moduleMeditation
+            Screen.Weight -> moduleWeight
             else -> true
         }
     }
@@ -80,10 +85,11 @@ fun TrackinnRoot() {
         moduleTodo -> Screen.Todo.route
         moduleCalories -> Screen.Calorie.route
         moduleMeditation -> Screen.Meditation.route
+        moduleWeight -> Screen.Weight.route
         else -> Screen.Settings.route
     }
 
-    val mainRoutes = listOf(Screen.Todo.route, Screen.Calorie.route, Screen.Meditation.route)
+    val mainRoutes = listOf(Screen.Todo.route, Screen.Calorie.route, Screen.Meditation.route, Screen.Weight.route)
     val showTopBar = currentRoute in mainRoutes
 
     Scaffold(
@@ -278,6 +284,20 @@ fun TrackinnRoot() {
                 MeditationHistoryScreen(
                     onBack = { navController.popBackStack() },
                     viewModel = meditationViewModel
+                )
+            }
+            composable(Screen.Weight.route) {
+                val weightViewModel: WeightViewModel = viewModel(factory = WeightViewModel.Factory)
+                WeightScreen(
+                    onHistoryClick = { navController.navigate(Screen.WeightHistory.route) },
+                    viewModel = weightViewModel
+                )
+            }
+            composable(Screen.WeightHistory.route) {
+                val weightViewModel: WeightViewModel = viewModel(factory = WeightViewModel.Factory)
+                WeightHistoryScreen(
+                    onBack = { navController.popBackStack() },
+                    viewModel = weightViewModel
                 )
             }
             composable(Screen.Settings.route) {
