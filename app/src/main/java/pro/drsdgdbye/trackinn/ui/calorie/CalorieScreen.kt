@@ -1,10 +1,14 @@
 package pro.drsdgdbye.trackinn.ui.calorie
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,11 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -57,6 +63,7 @@ import java.util.Locale
 fun CalorieScreen(
     onAddMealClick: (mealType: String, date: Long) -> Unit = { _, _ -> },
     onDishListClick: () -> Unit = {},
+    onProductListClick: () -> Unit = {},
     onHistoryClick: () -> Unit = {},
     viewModel: CalorieViewModel = viewModel()
 ) {
@@ -65,6 +72,9 @@ fun CalorieScreen(
     val dateFormat = remember { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()) }
     val caloriesDailyGoal by viewModel.caloriesDailyGoal.collectAsState(initial = 2000)
     val totalCalories = meals.sumOf { meal -> meal.items.sumOf { it.calories } }
+    val totalProtein = meals.sumOf { meal -> meal.items.sumOf { it.protein } }
+    val totalFat = meals.sumOf { meal -> meal.items.sumOf { it.fat } }
+    val totalCarbs = meals.sumOf { meal -> meal.items.sumOf { it.carbs } }
     val progress = if (caloriesDailyGoal > 0) totalCalories.toFloat() / caloriesDailyGoal else 0f
 
     val progressBarColorHex by viewModel.progressBarColor.collectAsState(initial = "#4CAF50")
@@ -95,8 +105,15 @@ fun CalorieScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onDishListClick) {
-                Icon(Icons.Default.Restaurant, contentDescription = stringResource(R.string.dishes))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                FloatingActionButton(onClick = onProductListClick) {
+                    Icon(Icons.Default.ShoppingCart, contentDescription = stringResource(R.string.product_list))
+                }
+                FloatingActionButton(onClick = onDishListClick) {
+                    Icon(Icons.Default.Restaurant, contentDescription = stringResource(R.string.dishes))
+                }
             }
         }
     ) { padding ->
@@ -138,6 +155,33 @@ fun CalorieScreen(
                         progress > 0.8f -> approachingGoalColor
                         else -> progressBarColor
                     }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                val totalMacros = totalProtein + totalFat + totalCarbs
+                if (totalMacros > 0) {
+                    val proteinPct = totalProtein * 100 / totalMacros
+                    val fatPct = totalFat * 100 / totalMacros
+                    val carbsPct = totalCarbs * 100 / totalMacros
+                    Text(
+                        stringResource(R.string.macros_percent_format, proteinPct, fatPct, carbsPct),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Text(
+                        stringResource(R.string.macros_format, totalProtein, totalFat, totalCarbs),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                MacroRatioBar(
+                    protein = totalProtein,
+                    fat = totalFat,
+                    carbs = totalCarbs,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
                 )
             }
         }
@@ -209,14 +253,35 @@ private fun MealSection(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.End,
-                modifier = Modifier.width(96.dp)
+                modifier = Modifier.width(72.dp)
+            )
+            Text(
+                stringResource(R.string.table_protein),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(40.dp)
+            )
+            Text(
+                stringResource(R.string.table_fat),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(40.dp)
+            )
+            Text(
+                stringResource(R.string.table_carbs),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(40.dp)
             )
             Text(
                 stringResource(R.string.table_kcal),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.End,
-                modifier = Modifier.width(80.dp)
+                modifier = Modifier.width(64.dp)
             )
         }
 
@@ -247,13 +312,34 @@ private fun MealSection(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.width(96.dp)
+                        modifier = Modifier.width(72.dp)
+                    )
+                    Text(
+                        item.protein.toString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(40.dp)
+                    )
+                    Text(
+                        item.fat.toString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(40.dp)
+                    )
+                    Text(
+                        item.carbs.toString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(40.dp)
                     )
                     Text(
                         stringResource(R.string.calories_short, item.calories),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.End,
-                        modifier = Modifier.width(80.dp)
+                        modifier = Modifier.width(64.dp)
                     )
                 }
                 if (index < meal.items.lastIndex) {
@@ -290,10 +376,19 @@ private fun EditMealItemDialog(
                     val newCalories = if (item.weight > 0) {
                         (item.calories.toLong() * weight / item.weight).toInt()
                     } else item.calories
+                    val newProtein = (item.proteinPer100.toLong() * weight / 100).toInt()
+                    val newFat = (item.fatPer100.toLong() * weight / 100).toInt()
+                    val newCarbs = (item.carbsPer100.toLong() * weight / 100).toInt()
                     Text(
                         stringResource(R.string.approx_calories, newCalories),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Text(
+                        stringResource(R.string.macros_format, newProtein, newFat, newCarbs),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
@@ -319,4 +414,50 @@ private fun EditMealItemDialog(
             }
         }
     )
+}
+
+@Composable
+private fun MacroRatioBar(
+    protein: Int,
+    fat: Int,
+    carbs: Int,
+    modifier: Modifier = Modifier
+) {
+    val total = protein + fat + carbs
+    if (total <= 0) {
+        Box(
+            modifier = modifier
+                .background(
+                    MaterialTheme.colorScheme.outlineVariant,
+                    RoundedCornerShape(4.dp)
+                )
+        )
+        return
+    }
+    val proteinColor = Color(0xFF2196F3)
+    val fatColor = Color(0xFFF44336)
+    val carbsColor = Color(0xFFFFEB3B)
+    Row(
+        modifier = modifier
+            .height(IntrinsicSize.Min)
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(protein.toFloat())
+                .fillMaxHeight()
+                .background(proteinColor, RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp))
+        )
+        Box(
+            modifier = Modifier
+                .weight(fat.toFloat())
+                .fillMaxHeight()
+                .background(fatColor)
+        )
+        Box(
+            modifier = Modifier
+                .weight(carbs.toFloat())
+                .fillMaxHeight()
+                .background(carbsColor, RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp))
+        )
+    }
 }

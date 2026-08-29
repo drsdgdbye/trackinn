@@ -23,6 +23,10 @@ sealed class Screen(val route: String) {
     data object DishEditor : Screen("dish_editor?dishId={dishId}") {
         fun createRoute(dishId: Long? = null) = if (dishId != null) "dish_editor?dishId=$dishId" else "dish_editor"
     }
+    data object ProductList : Screen("product_list")
+    data object ProductEditor : Screen("product_editor?productId={productId}") {
+        fun createRoute(productId: Long? = null) = if (productId != null) "product_editor?productId=$productId" else "product_editor"
+    }
     data object Meditation : Screen("meditation")
     data object TimerEditor : Screen("timer_editor?timerId={timerId}") {
         fun createRoute(timerId: Long? = null) = if (timerId != null) "timer_editor?timerId=$timerId" else "timer_editor"

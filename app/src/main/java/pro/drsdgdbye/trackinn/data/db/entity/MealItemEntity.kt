@@ -40,5 +40,11 @@ data class MealItemEntity(
     val compositeDishId: Long? = null,
     val name: String,
     val weight: Int,
-    val calories: Int
+    val calories: Int,
+    val proteinPer100: Int = 0,
+    val fatPer100: Int = 0,
+    val carbsPer100: Int = 0,
+    val protein: Int = 0,
+    val fat: Int = 0,
+    val carbs: Int = 0
 )

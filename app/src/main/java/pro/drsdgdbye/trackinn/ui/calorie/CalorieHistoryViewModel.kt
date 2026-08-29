@@ -28,12 +28,18 @@ data class DashboardStats(
 
 data class WeeklyStat(
     val weekStart: LocalDate,
-    val totalCalories: Int
+    val totalCalories: Int,
+    val totalProtein: Int = 0,
+    val totalFat: Int = 0,
+    val totalCarbs: Int = 0
 )
 
 data class DailyStat(
     val date: LocalDate,
-    val calories: Int
+    val calories: Int,
+    val protein: Int = 0,
+    val fat: Int = 0,
+    val carbs: Int = 0
 )
 
 data class DaySummary(

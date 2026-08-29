@@ -158,7 +158,9 @@ fun CalorieHistoryScreen(
                             labels = dailyStats.map {
                                 it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, chartLocale)
                             },
-                            values = dailyStats.map { it.calories }
+                            proteinValues = dailyStats.map { it.protein },
+                            fatValues = dailyStats.map { it.fat },
+                            carbsValues = dailyStats.map { it.carbs }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -171,7 +173,12 @@ fun CalorieHistoryScreen(
                             }
                             else -> emptyList()
                         }
-                        CalorieBarChart(labels = labels, values = weeklyStats.map { it.totalCalories })
+                        CalorieBarChart(
+                            labels = labels,
+                            proteinValues = weeklyStats.map { it.totalProtein },
+                            fatValues = weeklyStats.map { it.totalFat },
+                            carbsValues = weeklyStats.map { it.totalCarbs }
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -300,13 +307,20 @@ private fun StatCard(
 }
 
 @Composable
-private fun CalorieBarChart(labels: List<String>, values: List<Int>) {
+private fun CalorieBarChart(
+    labels: List<String>,
+    proteinValues: List<Int>,
+    fatValues: List<Int>,
+    carbsValues: List<Int>
+) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    LaunchedEffect(values) {
+    LaunchedEffect(proteinValues, fatValues, carbsValues) {
         modelProducer.runTransaction {
             columnModel {
-                series(values)
+                series(proteinValues)
+                series(fatValues)
+                series(carbsValues)
             }
         }
     }
@@ -318,6 +332,26 @@ private fun CalorieBarChart(labels: List<String>, values: List<Int>) {
         }
     }
 
+    val proteinColor = Color(0xFF2196F3)
+    val fatColor = Color(0xFFF44336)
+    val carbsColor = Color(0xFFFFEB3B)
+
+    val proteinColumn = com.patrykandpatrick.vico.compose.common.component.rememberLineComponent(
+        com.patrykandpatrick.vico.compose.common.Fill(proteinColor),
+        10.dp
+    )
+    val fatColumn = com.patrykandpatrick.vico.compose.common.component.rememberLineComponent(
+        com.patrykandpatrick.vico.compose.common.Fill(fatColor),
+        10.dp
+    )
+    val carbsColumn = com.patrykandpatrick.vico.compose.common.component.rememberLineComponent(
+        com.patrykandpatrick.vico.compose.common.Fill(carbsColor),
+        10.dp
+    )
+    val columnProvider = com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer.ColumnProvider.series(
+        proteinColumn, fatColumn, carbsColumn
+    )
+
     Column {
         Text(
             text = stringResource(R.string.stat_calories_title),
@@ -326,7 +360,10 @@ private fun CalorieBarChart(labels: List<String>, values: List<Int>) {
         )
         CartesianChartHost(
             chart = rememberCartesianChart(
-                rememberColumnCartesianLayer(),
+                rememberColumnCartesianLayer(
+                    columnProvider = columnProvider,
+                    mergeMode = { com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer.MergeMode.Stacked }
+                ),
                 startAxis = VerticalAxis.rememberStart(),
                 bottomAxis = HorizontalAxis.rememberBottom(valueFormatter = valueFormatter),
             ),

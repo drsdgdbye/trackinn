@@ -83,16 +83,25 @@ class AddMealViewModel(
             val mealId = mealRepository.getOrCreateMeal(date, mealType)
             when (item) {
                 is SearchResult.Product -> {
-                    val caloriesPer100 = item.product.caloriesPer100
-                    val calories = (weight * caloriesPer100 / 100.0).toInt()
+                    val product = item.product
+                    val calories = (weight * product.caloriesPer100 / 100.0).toInt()
+                    val protein = (weight * product.proteinPer100 / 100.0).toInt()
+                    val fat = (weight * product.fatPer100 / 100.0).toInt()
+                    val carbs = (weight * product.carbsPer100 / 100.0).toInt()
                     mealRepository.addItem(
                         mealId,
                         MealItemEntity(
                             mealId = mealId,
-                            productId = item.product.id,
-                            name = item.product.name,
+                            productId = product.id,
+                            name = product.name,
                             weight = weight,
-                            calories = calories
+                            calories = calories,
+                            proteinPer100 = product.proteinPer100,
+                            fatPer100 = product.fatPer100,
+                            carbsPer100 = product.carbsPer100,
+                            protein = protein,
+                            fat = fat,
+                            carbs = carbs
                         )
                     )
                 }
@@ -116,7 +125,16 @@ class AddMealViewModel(
                         }
                         val totalNutrients = NutrientCalculation.totals(ingredientNutrients)
                         val caloriesPerGram = totalNutrients.calories.toFloat() / dish.cookedWeightGrams
+                        val proteinPerGram = totalNutrients.protein.toFloat() / dish.cookedWeightGrams
+                        val fatPerGram = totalNutrients.fat.toFloat() / dish.cookedWeightGrams
+                        val carbsPerGram = totalNutrients.carbs.toFloat() / dish.cookedWeightGrams
                         val calories = (weight * caloriesPerGram).toInt()
+                        val protein = (weight * proteinPerGram).toInt()
+                        val fat = (weight * fatPerGram).toInt()
+                        val carbs = (weight * carbsPerGram).toInt()
+                        val proteinPer100 = (totalNutrients.protein.toLong() * 100 / dish.cookedWeightGrams).toInt()
+                        val fatPer100 = (totalNutrients.fat.toLong() * 100 / dish.cookedWeightGrams).toInt()
+                        val carbsPer100 = (totalNutrients.carbs.toLong() * 100 / dish.cookedWeightGrams).toInt()
                         mealRepository.addItem(
                             mealId,
                             MealItemEntity(
@@ -124,7 +142,13 @@ class AddMealViewModel(
                                 compositeDishId = dish.id,
                                 name = dish.name,
                                 weight = weight,
-                                calories = calories
+                                calories = calories,
+                                proteinPer100 = proteinPer100,
+                                fatPer100 = fatPer100,
+                                carbsPer100 = carbsPer100,
+                                protein = protein,
+                                fat = fat,
+                                carbs = carbs
                             )
                         )
                     }

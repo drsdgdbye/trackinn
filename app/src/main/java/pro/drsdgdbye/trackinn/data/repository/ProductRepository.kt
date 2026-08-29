@@ -10,6 +10,8 @@ class ProductRepository(private val productDao: ProductDao) {
 
     fun getAll(): Flow<List<ProductEntity>> = productDao.getAll()
 
+    fun getAllSortedByModified(): Flow<List<ProductEntity>> = productDao.getAllSortedByModified()
+
     suspend fun getById(id: Long): ProductEntity? = productDao.getById(id)
 
     suspend fun create(product: ProductEntity): Long = productDao.insert(product)

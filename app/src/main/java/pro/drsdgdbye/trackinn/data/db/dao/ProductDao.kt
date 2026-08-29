@@ -16,6 +16,9 @@ interface ProductDao {
     @Query("SELECT * FROM products ORDER BY name ASC")
     fun getAll(): Flow<List<ProductEntity>>
 
+    @Query("SELECT * FROM products ORDER BY lastModified DESC")
+    fun getAllSortedByModified(): Flow<List<ProductEntity>>
+
     @Query("SELECT * FROM products WHERE id = :id")
     suspend fun getById(id: Long): ProductEntity?
 

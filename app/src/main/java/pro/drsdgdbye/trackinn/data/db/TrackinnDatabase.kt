@@ -32,7 +32,7 @@ import pro.drsdgdbye.trackinn.data.db.entity.TaskEntity
         MeditationSessionEntity::class,
         SavedTimerEntity::class
     ],
-    version = 3,
+    version = 5,
     exportSchema = false
 )
 abstract class TrackinnDatabase : RoomDatabase() {
@@ -99,6 +99,25 @@ abstract class TrackinnDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                val now = System.currentTimeMillis()
+                db.execSQL("ALTER TABLE products ADD COLUMN lastModified INTEGER NOT NULL DEFAULT $now")
+                db.execSQL("UPDATE products SET lastModified = $now WHERE lastModified = 0")
+            }
+        }
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN proteinPer100 INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN fatPer100 INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN carbsPer100 INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN protein INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN fat INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE meal_items ADD COLUMN carbs INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun getInstance(context: Context): TrackinnDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -106,7 +125,7 @@ abstract class TrackinnDatabase : RoomDatabase() {
                     TrackinnDatabase::class.java,
                     "trackinn.db"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                 INSTANCE = instance
                 instance

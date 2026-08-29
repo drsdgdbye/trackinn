@@ -12,5 +12,6 @@ data class ProductEntity(
     val caloriesPer100: Int,
     val proteinPer100: Int,
     val fatPer100: Int,
-    val carbsPer100: Int
+    val carbsPer100: Int,
+    val lastModified: Long = System.currentTimeMillis()
 )

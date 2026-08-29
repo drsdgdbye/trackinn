@@ -116,6 +116,10 @@
     <string name="ingredients">Ингредиенты</string>
     <string name="search_product_hint">Поиск продукта…</string>
     <string name="create_product_format">Создать продукт "%s"</string>
+    <string name="product_list">Продукты</string>
+    <string name="edit_product">Редактирование продукта</string>
+    <string name="delete_product">Удалить продукт</string>
+    <string name="delete_product_confirm">Удалить продукт \"%s\"?</string>
     <string name="gram_short">г</string>
     <string name="delete_dish">Удалить блюдо?</string>
     <string name="delete_dish_confirm">Это действие нельзя отменить.</string>
@@ -176,6 +180,12 @@
     <string name="table_name">Название</string>
     <string name="table_weight">Вес (г)</string>
     <string name="table_kcal">Ккал</string>
+    <string name="table_protein">Б</string>
+    <string name="table_fat">Ж</string>
+    <string name="table_carbs">У</string>
+    <string name="macros_format">Б:%1$d Ж:%2$d У:%3$d</string>
+    <string name="macros_percent_format">Б:%1$d%% Ж:%2$d%% У:%3$d%%</string>
+    <string name="macros_with_weight">Б:%1$d Ж:%2$d У:%3$d (при %4$dг)</string>
     <string name="no_entries">Нет записей</string>
     <string name="save_changes_title">Сохранить изменения?</string>
     <string name="save_changes_message">Внести изменения в блюдо перед выходом?</string>

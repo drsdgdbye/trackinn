@@ -11,48 +11,73 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import pro.drsdgdbye.trackinn.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewProductScreen(
-    initialName: String = "",
+fun ProductEditorScreen(
+    productId: Long = -1,
     onBack: () -> Unit,
-    onSaved: (name: String, category: String?, unit: String, cal: Int, pro: Int, fat: Int, carbs: Int) -> Unit
+    onSaved: () -> Unit,
+    onDelete: () -> Unit = {},
+    viewModel: ProductEditorViewModel = viewModel()
 ) {
-    var name by remember { mutableStateOf(initialName) }
-    var category by remember { mutableStateOf("") }
-    var unit by remember { mutableStateOf("GRAM") }
-    var calories by remember { mutableStateOf("") }
-    var protein by remember { mutableStateOf("") }
-    var fat by remember { mutableStateOf("") }
-    var carbs by remember { mutableStateOf("") }
+    val isEditMode = productId > 0
+
+    LaunchedEffect(productId) {
+        if (isEditMode) viewModel.loadProduct(productId)
+    }
+
+    val name by viewModel.name.collectAsState()
+    val category by viewModel.category.collectAsState()
+    val unit by viewModel.unit.collectAsState()
+    val calories by viewModel.calories.collectAsState()
+    val protein by viewModel.protein.collectAsState()
+    val fat by viewModel.fat.collectAsState()
+    val carbs by viewModel.carbs.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.new_product)) },
+                title = {
+                    Text(stringResource(if (isEditMode) R.string.edit_product else R.string.new_product))
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                },
+                actions = {
+                    if (isEditMode) {
+                        IconButton(onClick = {
+                            viewModel.deleteProduct(onDelete)
+                        }) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.delete),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             )
@@ -67,7 +92,7 @@ fun NewProductScreen(
         ) {
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = { viewModel.name.value = it },
                 label = { Text(stringResource(R.string.product_name)) },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -76,9 +101,9 @@ fun NewProductScreen(
 
             Text(stringResource(R.string.unit_label))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(selected = unit == "GRAM", onClick = { unit = "GRAM" })
+                RadioButton(selected = unit == "GRAM", onClick = { viewModel.unit.value = "GRAM" })
                 Text(stringResource(R.string.unit_grams))
-                RadioButton(selected = unit == "ML", onClick = { unit = "ML" })
+                RadioButton(selected = unit == "ML", onClick = { viewModel.unit.value = "ML" })
                 Text(stringResource(R.string.unit_ml))
             }
 
@@ -87,25 +112,25 @@ fun NewProductScreen(
 
             OutlinedTextField(
                 value = calories,
-                onValueChange = { calories = it },
+                onValueChange = { viewModel.calories.value = it },
                 label = { Text(stringResource(R.string.calories_label)) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = protein,
-                onValueChange = { protein = it },
+                onValueChange = { viewModel.protein.value = it },
                 label = { Text(stringResource(R.string.protein_short_label)) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = fat,
-                onValueChange = { fat = it },
+                onValueChange = { viewModel.fat.value = it },
                 label = { Text(stringResource(R.string.fat_short_label)) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = carbs,
-                onValueChange = { carbs = it },
+                onValueChange = { viewModel.carbs.value = it },
                 label = { Text(stringResource(R.string.carbs_short_label)) },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -114,7 +139,7 @@ fun NewProductScreen(
 
             OutlinedTextField(
                 value = category,
-                onValueChange = { category = it },
+                onValueChange = { viewModel.category.value = it },
                 label = { Text(stringResource(R.string.category_optional)) },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -122,22 +147,10 @@ fun NewProductScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             TextButton(
-                onClick = {
-                    if (name.isNotBlank() && calories.toIntOrNull() != null) {
-                        onSaved(
-                            name.trim(),
-                            category.ifBlank { null },
-                            unit,
-                            calories.toInt(),
-                            protein.toIntOrNull() ?: 0,
-                            fat.toIntOrNull() ?: 0,
-                            carbs.toIntOrNull() ?: 0
-                        )
-                    }
-                },
+                onClick = { viewModel.saveProduct(onSaved) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.save_and_add))
+                Text(stringResource(R.string.save))
             }
         }
     }

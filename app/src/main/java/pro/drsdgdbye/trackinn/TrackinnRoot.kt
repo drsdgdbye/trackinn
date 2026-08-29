@@ -33,6 +33,10 @@ import pro.drsdgdbye.trackinn.ui.calorie.DishEditorScreen
 import pro.drsdgdbye.trackinn.ui.calorie.DishEditorViewModel
 import pro.drsdgdbye.trackinn.ui.calorie.DishListScreen
 import pro.drsdgdbye.trackinn.ui.calorie.DishListViewModel
+import pro.drsdgdbye.trackinn.ui.calorie.ProductEditorScreen
+import pro.drsdgdbye.trackinn.ui.calorie.ProductEditorViewModel
+import pro.drsdgdbye.trackinn.ui.calorie.ProductListScreen
+import pro.drsdgdbye.trackinn.ui.calorie.ProductListViewModel
 import pro.drsdgdbye.trackinn.ui.meditation.MeditationScreen
 import pro.drsdgdbye.trackinn.ui.meditation.MeditationViewModel
 import pro.drsdgdbye.trackinn.ui.meditation.MeditationHistoryScreen
@@ -152,6 +156,9 @@ fun TrackinnRoot() {
                     onDishListClick = {
                         navController.navigate(Screen.DishList.route)
                     },
+                    onProductListClick = {
+                        navController.navigate(Screen.ProductList.route)
+                    },
                     onHistoryClick = {
                         navController.navigate(Screen.CalorieHistory.route)
                     },
@@ -203,6 +210,29 @@ fun TrackinnRoot() {
                     onBack = { navController.popBackStack() },
                     onSaved = { navController.popBackStack() },
                     viewModel = dishEditorViewModel
+                )
+            }
+            composable(Screen.ProductList.route) {
+                val productListViewModel: ProductListViewModel = viewModel(factory = ProductListViewModel.Factory)
+                ProductListScreen(
+                    onBack = { navController.popBackStack() },
+                    onProductClick = { productId -> navController.navigate(Screen.ProductEditor.createRoute(productId)) },
+                    onAddClick = { navController.navigate(Screen.ProductEditor.createRoute()) },
+                    viewModel = productListViewModel
+                )
+            }
+            composable(
+                route = Screen.ProductEditor.route,
+                arguments = listOf(navArgument("productId") { type = NavType.LongType; defaultValue = -1L })
+            ) { backStackEntry ->
+                val productId = backStackEntry.arguments?.getLong("productId") ?: -1L
+                val productEditorViewModel: ProductEditorViewModel = viewModel(factory = ProductEditorViewModel.Factory)
+                ProductEditorScreen(
+                    productId = productId,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
+                    onDelete = { navController.popBackStack() },
+                    viewModel = productEditorViewModel
                 )
             }
             composable(Screen.Meditation.route) { backStackEntry ->

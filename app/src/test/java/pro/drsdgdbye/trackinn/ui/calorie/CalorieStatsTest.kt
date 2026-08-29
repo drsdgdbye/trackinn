@@ -18,14 +18,17 @@ class CalorieStatsTest {
     private val today: LocalDate = LocalDate.of(2026, 8, 28) // пятница
     private val goal: Int = 2000
 
-    private fun itemOn(date: LocalDate, calories: Int): MealItemWithDate {
+    private fun itemOn(date: LocalDate, calories: Int, protein: Int = 0, fat: Int = 0, carbs: Int = 0): MealItemWithDate {
         val dateMillis = date.atStartOfDay(zone).toInstant().toEpochMilli()
         return MealItemWithDate(
             item = MealItemEntity(
                 mealId = 1,
                 name = "test",
                 weight = 100,
-                calories = calories
+                calories = calories,
+                protein = protein,
+                fat = fat,
+                carbs = carbs
             ),
             date = dateMillis
         )
@@ -33,6 +36,9 @@ class CalorieStatsTest {
 
     private fun itemsOn(vararg entries: Pair<LocalDate, Int>): List<MealItemWithDate> =
         entries.map { (date, calories) -> itemOn(date, calories) }
+
+    private fun itemsOnWithMacros(vararg entries: Triple<LocalDate, Int, Triple<Int, Int, Int>>): List<MealItemWithDate> =
+        entries.map { (date, calories, macros) -> itemOn(date, calories, macros.first, macros.second, macros.third) }
 
     @Test
     fun isValidDay_below60Percent_invalid() {
@@ -267,5 +273,52 @@ class CalorieStatsTest {
         assertEquals(2, map.size)
         assertEquals(800, map[today])
         assertEquals(400, map[today.minusDays(1)])
+    }
+
+    @Test
+    fun dailyMacroMap_groupsByDayAndSums() {
+        val items = itemsOnWithMacros(
+            Triple(today, 500, Triple(30, 20, 50)),
+            Triple(today, 300, Triple(10, 5, 40)),
+            Triple(today.minusDays(1), 400, Triple(20, 10, 30))
+        )
+        val map = CalorieStats.dailyMacroMap(items, zone)
+        assertEquals(2, map.size)
+        assertEquals(Triple(40, 25, 90), map[today])
+        assertEquals(Triple(20, 10, 30), map[today.minusDays(1)])
+    }
+
+    @Test
+    fun dailyMacroMap_empty_returnsEmptyMap() {
+        val map = CalorieStats.dailyMacroMap(emptyList(), zone)
+        assertTrue(map.isEmpty())
+    }
+
+    @Test
+    fun computeWeeklyStats_includesMacros() {
+        val currentWeekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val items = itemsOnWithMacros(
+            Triple(currentWeekStart, 1000, Triple(50, 30, 100)),
+            Triple(currentWeekStart.plusDays(2), 500, Triple(25, 15, 50))
+        )
+        val result = CalorieStats.computeWeeklyStats(items, today, StatsPeriod.MONTH, zone)
+        assertEquals(4, result.size)
+        assertEquals(75, result.last().totalProtein)
+        assertEquals(45, result.last().totalFat)
+        assertEquals(150, result.last().totalCarbs)
+    }
+
+    @Test
+    fun computeDailyStats_includesMacros() {
+        val monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val items = itemsOnWithMacros(
+            Triple(monday, 1200, Triple(60, 40, 120))
+        )
+        val result = CalorieStats.computeDailyStats(items, today, StatsPeriod.WEEK, zone)
+        assertEquals(7, result.size)
+        assertEquals(60, result.first().protein)
+        assertEquals(40, result.first().fat)
+        assertEquals(120, result.first().carbs)
+        assertEquals(0, result[1].protein)
     }
 }

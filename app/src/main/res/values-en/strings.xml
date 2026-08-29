@@ -116,6 +116,10 @@
     <string name="ingredients">Ingredients</string>
     <string name="search_product_hint">Search product…</string>
     <string name="create_product_format">Create product "%s"</string>
+    <string name="product_list">Products</string>
+    <string name="edit_product">Edit product</string>
+    <string name="delete_product">Delete product</string>
+    <string name="delete_product_confirm">Delete product \"%s\"?</string>
     <string name="gram_short">g</string>
     <string name="delete_dish">Delete dish?</string>
     <string name="delete_dish_confirm">This action cannot be undone.</string>
@@ -176,6 +180,12 @@
     <string name="table_name">Name</string>
     <string name="table_weight">Weight (g)</string>
     <string name="table_kcal">kcal</string>
+    <string name="table_protein">P</string>
+    <string name="table_fat">F</string>
+    <string name="table_carbs">C</string>
+    <string name="macros_format">P:%1$d F:%2$d C:%3$d</string>
+    <string name="macros_percent_format">P:%1$d%% F:%2$d%% C:%3$d%%</string>
+    <string name="macros_with_weight">P:%1$d F:%2$d C:%3$d (for %4$dg)</string>
     <string name="no_entries">No entries</string>
     <string name="save_changes_title">Save changes?</string>
     <string name="save_changes_message">Apply changes to the dish before leaving?</string>

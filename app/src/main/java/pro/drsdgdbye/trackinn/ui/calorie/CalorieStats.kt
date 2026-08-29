@@ -50,6 +50,22 @@ internal object CalorieStats {
             .mapValues { (_, dayItems) -> dayItems.sumOf { it.item.calories } }
     }
 
+    /** БЖУ по дням (только дни с записями). */
+    fun dailyMacroMap(
+        items: List<MealItemWithDate>,
+        zone: ZoneId
+    ): Map<LocalDate, Triple<Int, Int, Int>> {
+        return items
+            .groupBy { Instant.ofEpochMilli(it.date).atZone(zone).toLocalDate() }
+            .mapValues { (_, dayItems) ->
+                Triple(
+                    dayItems.sumOf { it.item.protein },
+                    dayItems.sumOf { it.item.fat },
+                    dayItems.sumOf { it.item.carbs }
+                )
+            }
+    }
+
     fun filterByRange(
         items: List<MealItemWithDate>,
         start: LocalDate,
@@ -140,6 +156,7 @@ internal object CalorieStats {
         zone: ZoneId
     ): List<WeeklyStat> {
         val daily = dailyCaloriesMap(items, zone)
+        val dailyMacros = dailyMacroMap(items, zone)
         return when (period) {
             StatsPeriod.WEEK -> emptyList()
             StatsPeriod.MONTH -> {
@@ -150,12 +167,21 @@ internal object CalorieStats {
                     val weekStart = weekEnd.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                     val weekEndClamped = weekEnd.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
                     var calories = 0
+                    var protein = 0
+                    var fat = 0
+                    var carbs = 0
                     var current = weekStart
                     while (!current.isAfter(weekEndClamped)) {
                         calories += daily[current] ?: 0
+                        val macros = dailyMacros[current]
+                        if (macros != null) {
+                            protein += macros.first
+                            fat += macros.second
+                            carbs += macros.third
+                        }
                         current = current.plusDays(1)
                     }
-                    result.add(WeeklyStat(weekStart, calories))
+                    result.add(WeeklyStat(weekStart, calories, protein, fat, carbs))
                 }
                 result
             }
@@ -165,12 +191,21 @@ internal object CalorieStats {
                     val monthStart = now.minusMonths(i.toLong()).withDayOfMonth(1)
                     val monthEnd = monthStart.plusMonths(1).minusDays(1)
                     var calories = 0
+                    var protein = 0
+                    var fat = 0
+                    var carbs = 0
                     var current = monthStart
                     while (!current.isAfter(monthEnd)) {
                         calories += daily[current] ?: 0
+                        val macros = dailyMacros[current]
+                        if (macros != null) {
+                            protein += macros.first
+                            fat += macros.second
+                            carbs += macros.third
+                        }
                         current = current.plusDays(1)
                     }
-                    result.add(WeeklyStat(monthStart, calories))
+                    result.add(WeeklyStat(monthStart, calories, protein, fat, carbs))
                 }
                 result
             }
@@ -185,10 +220,12 @@ internal object CalorieStats {
     ): List<DailyStat> {
         val (start, end) = getPeriodRange(now, period)
         val daily = dailyCaloriesMap(items, zone)
+        val dailyMacros = dailyMacroMap(items, zone)
         val result = mutableListOf<DailyStat>()
         var current = start
         while (!current.isAfter(end)) {
-            result.add(DailyStat(current, daily[current] ?: 0))
+            val macros = dailyMacros[current] ?: Triple(0, 0, 0)
+            result.add(DailyStat(current, daily[current] ?: 0, macros.first, macros.second, macros.third))
             current = current.plusDays(1)
         }
         return result

@@ -62,7 +62,18 @@ class CalorieViewModel(
             val newCalories = if (item.weight > 0) {
                 (item.calories.toLong() * newWeight / item.weight).toInt()
             } else item.calories
-            mealRepository.updateItem(item.copy(weight = newWeight, calories = newCalories))
+            val newProtein = (item.proteinPer100.toLong() * newWeight / 100).toInt()
+            val newFat = (item.fatPer100.toLong() * newWeight / 100).toInt()
+            val newCarbs = (item.carbsPer100.toLong() * newWeight / 100).toInt()
+            mealRepository.updateItem(
+                item.copy(
+                    weight = newWeight,
+                    calories = newCalories,
+                    protein = newProtein,
+                    fat = newFat,
+                    carbs = newCarbs
+                )
+            )
         }
     }
 

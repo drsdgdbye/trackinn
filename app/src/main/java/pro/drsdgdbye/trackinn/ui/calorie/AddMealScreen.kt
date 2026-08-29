@@ -111,6 +111,7 @@ fun AddMealScreen(
 
             if (selectedResult != null) {
                 val item = selectedResult!!
+                val weightValue = weight.toIntOrNull() ?: 0
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -143,6 +144,26 @@ fun AddMealScreen(
                     label = { Text(stringResource(R.string.weight_gram)) },
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                if (weightValue > 0) {
+                    val previewMacros = when (item) {
+                        is SearchResult.Product -> {
+                            val p = (weightValue * item.product.proteinPer100 / 100.0).toInt()
+                            val f = (weightValue * item.product.fatPer100 / 100.0).toInt()
+                            val c = (weightValue * item.product.carbsPer100 / 100.0).toInt()
+                            Triple(p, f, c)
+                        }
+                        is SearchResult.Dish -> Triple(0, 0, 0)
+                    }
+                    if (previewMacros != Triple(0, 0, 0)) {
+                        Text(
+                            stringResource(R.string.macros_format, previewMacros.first, previewMacros.second, previewMacros.third),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
 
             }
 
@@ -180,7 +201,15 @@ fun AddMealScreen(
                             )
                             Text(
                                 when (result) {
-                                    is SearchResult.Product -> stringResource(R.string.calories_per_100g, result.product.caloriesPer100)
+                                    is SearchResult.Product -> stringResource(
+                                        R.string.calories_per_100g,
+                                        result.product.caloriesPer100
+                                    ) + " · " + stringResource(
+                                        R.string.macros_format,
+                                        result.product.proteinPer100,
+                                        result.product.fatPer100,
+                                        result.product.carbsPer100
+                                    )
                                     is SearchResult.Dish -> "${result.dish.cookedWeightGrams}${stringResource(R.string.gram_short)}"
                                 },
                                 style = MaterialTheme.typography.bodySmall,

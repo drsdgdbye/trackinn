@@ -55,7 +55,7 @@ class MigrationTest {
         }
 
         val roomDb = Room.databaseBuilder(context, TrackinnDatabase::class.java, TEST_DB)
-            .addMigrations(TrackinnDatabase.MIGRATION_1_2, TrackinnDatabase.MIGRATION_2_3)
+            .addMigrations(TrackinnDatabase.MIGRATION_1_2, TrackinnDatabase.MIGRATION_2_3, TrackinnDatabase.MIGRATION_3_4)
             .build()
 
         val products = runBlocking { roomDb.productDao().getAll().first() }
@@ -101,7 +101,7 @@ class MigrationTest {
         }
 
         val roomDb = Room.databaseBuilder(context, TrackinnDatabase::class.java, TEST_DB)
-            .addMigrations(TrackinnDatabase.MIGRATION_1_2, TrackinnDatabase.MIGRATION_2_3)
+            .addMigrations(TrackinnDatabase.MIGRATION_1_2, TrackinnDatabase.MIGRATION_2_3, TrackinnDatabase.MIGRATION_3_4)
             .build()
 
         val product = runBlocking { roomDb.productDao().getById(1) }!!
@@ -136,7 +136,37 @@ class MigrationTest {
         roomDb.close()
     }
 
-    private fun createDatabaseV1(): SupportSQLiteDatabase {
+    @Test
+    fun migrate4To5_addsMacroColumnsWithDefaults() {
+        createDatabaseV4().use { db ->
+            db.execSQL("INSERT INTO meals (type, date) VALUES ('BREAKFAST', 1750000000000)")
+            db.execSQL(
+                "INSERT INTO meal_items (mealId, name, weight, calories) " +
+                    "VALUES (1, 'Oatmeal', 100, 350)"
+            )
+        }
+
+        val roomDb = Room.databaseBuilder(context, TrackinnDatabase::class.java, TEST_DB)
+            .addMigrations(TrackinnDatabase.MIGRATION_4_5)
+            .build()
+
+        val items = runBlocking {
+            val meals = roomDb.mealDao().getAll().first()
+            roomDb.mealDao().getItemsByMealIdList(meals[0].id)
+        }
+        assertEquals(1, items.size)
+        assertEquals(350, items[0].calories)
+        assertEquals(0, items[0].proteinPer100)
+        assertEquals(0, items[0].fatPer100)
+        assertEquals(0, items[0].carbsPer100)
+        assertEquals(0, items[0].protein)
+        assertEquals(0, items[0].fat)
+        assertEquals(0, items[0].carbs)
+
+        roomDb.close()
+    }
+
+    private fun createDatabaseV4(): SupportSQLiteDatabase {
         val openHelper: SupportSQLiteOpenHelper = FrameworkSQLiteOpenHelperFactory().create(
             SupportSQLiteOpenHelper.Configuration.builder(context)
                 .name(TEST_DB)
@@ -211,6 +241,110 @@ class MigrationTest {
                                 "caloriesGoal INTEGER NOT NULL, " +
                                 "PRIMARY KEY(date))"
                         )
+                        db.execSQL(
+                            "CREATE TABLE IF NOT EXISTS meditation_sessions (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                "startedAt INTEGER NOT NULL, " +
+                                "durationMinutes INTEGER NOT NULL, " +
+                                "completedAt INTEGER, " +
+                                "wasCompleted INTEGER NOT NULL)"
+                        )
+                        db.execSQL(
+                            "CREATE TABLE IF NOT EXISTS saved_timers (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                "name TEXT NOT NULL, " +
+                                "totalMinutes INTEGER NOT NULL, " +
+                                "prepSeconds INTEGER NOT NULL, " +
+                                "checkpointMinutes TEXT NOT NULL, " +
+                                "startSound TEXT, " +
+                                "endSound TEXT, " +
+                                "checkpointSound TEXT, " +
+                                "timerProgressColor TEXT NOT NULL, " +
+                                "checkpointPassedColor TEXT NOT NULL, " +
+                                "checkpointPendingColor TEXT NOT NULL, " +
+                                "position INTEGER NOT NULL)"
+                        )
+                    }
+
+                    override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+
+                    override fun onDowngrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+                })
+                .build()
+        )
+        return openHelper.writableDatabase
+    }
+
+    private fun createDatabaseV4(): SupportSQLiteDatabase {
+        val openHelper: SupportSQLiteOpenHelper = FrameworkSQLiteOpenHelperFactory().create(
+            SupportSQLiteOpenHelper.Configuration.builder(context)
+                .name(TEST_DB)
+                .callback(object : SupportSQLiteOpenHelper.Callback(4) {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        db.execSQL(
+                            "CREATE TABLE IF NOT EXISTS tasks (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                "title TEXT NOT NULL, " +
+                                "isDone INTEGER NOT NULL, " +
+                                "dueDate INTEGER, " +
+                                "dueTime INTEGER, " +
+                                "position INTEGER NOT NULL, " +
+                                "createdAt INTEGER NOT NULL, " +
+                                "updatedAt INTEGER NOT NULL)"
+                        )
+                        db.execSQL(
+                            "CREATE TABLE IF NOT EXISTS products (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                "name TEXT NOT NULL, " +
+                                "category TEXT, " +
+                                "unit TEXT NOT NULL, " +
+                                "caloriesPer100 INTEGER NOT NULL, " +
+                                "proteinPer100 INTEGER NOT NULL, " +
+                                "fatPer100 INTEGER NOT NULL, " +
+                                "carbsPer100 INTEGER NOT NULL, " +
+                                "lastModified INTEGER NOT NULL DEFAULT 0)"
+                        )
+                        db.execSQL(
+                            "CREATE TABLE IF NOT EXISTS composite_dishes (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                "name TEXT NOT NULL, " +
+                                "dishType TEXT NOT NULL, " +
+                                "cookedWeightGrams INTEGER NOT NULL)"
+                        )
+                        db.execSQL(
+                            "CREATE TABLE IF NOT EXISTS composite_dish_ingredients (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                "dishId INTEGER NOT NULL, " +
+                                "productId INTEGER, " +
+                                "quantity INTEGER NOT NULL, " +
+                                "position INTEGER NOT NULL, " +
+                                "FOREIGN KEY(dishId) REFERENCES composite_dishes(id) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                                "FOREIGN KEY(productId) REFERENCES products(id) ON UPDATE NO ACTION ON DELETE SET NULL)"
+                        )
+                        db.execSQL("CREATE INDEX IF NOT EXISTS index_composite_dish_ingredients_dishId ON composite_dish_ingredients (dishId)")
+                        db.execSQL("CREATE INDEX IF NOT EXISTS index_composite_dish_ingredients_productId ON composite_dish_ingredients (productId)")
+                        db.execSQL(
+                            "CREATE TABLE IF NOT EXISTS meals (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                "type TEXT NOT NULL, " +
+                                "date INTEGER NOT NULL)"
+                        )
+                        db.execSQL(
+                            "CREATE TABLE IF NOT EXISTS meal_items (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                                "mealId INTEGER NOT NULL, " +
+                                "productId INTEGER, " +
+                                "compositeDishId INTEGER, " +
+                                "name TEXT NOT NULL, " +
+                                "weight INTEGER NOT NULL, " +
+                                "calories INTEGER NOT NULL, " +
+                                "FOREIGN KEY(mealId) REFERENCES meals(id) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                                "FOREIGN KEY(productId) REFERENCES products(id) ON UPDATE NO ACTION ON DELETE SET NULL, " +
+                                "FOREIGN KEY(compositeDishId) REFERENCES composite_dishes(id) ON UPDATE NO ACTION ON DELETE SET NULL)"
+                        )
+                        db.execSQL("CREATE INDEX IF NOT EXISTS index_meal_items_mealId ON meal_items (mealId)")
+                        db.execSQL("CREATE INDEX IF NOT EXISTS index_meal_items_productId ON meal_items (productId)")
+                        db.execSQL("CREATE INDEX IF NOT EXISTS index_meal_items_compositeDishId ON meal_items (compositeDishId)")
                         db.execSQL(
                             "CREATE TABLE IF NOT EXISTS meditation_sessions (" +
                                 "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
