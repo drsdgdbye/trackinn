@@ -37,6 +37,10 @@ class TodoViewModel(
         viewModelScope.launch { repository.delete(task) }
     }
 
+    fun deleteCompleted() {
+        viewModelScope.launch { repository.deleteCompleted() }
+    }
+
     fun createTask(title: String, dueDate: Long?, dueTime: Long?, onComplete: (Long) -> Unit) {
         viewModelScope.launch {
             val id = repository.create(title, dueDate, dueTime)

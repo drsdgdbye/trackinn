@@ -28,6 +28,8 @@ class TaskRepository(private val taskDao: TaskDao) {
 
     suspend fun delete(task: TaskEntity) = taskDao.delete(task)
 
+    suspend fun deleteCompleted() = taskDao.deleteCompleted()
+
     suspend fun updatePositions(tasks: List<TaskEntity>) {
         tasks.forEachIndexed { index, task ->
             taskDao.update(task.copy(position = index))

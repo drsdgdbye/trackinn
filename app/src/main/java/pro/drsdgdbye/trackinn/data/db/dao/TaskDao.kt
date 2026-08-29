@@ -28,6 +28,9 @@ interface TaskDao {
     @Query("DELETE FROM tasks")
     suspend fun deleteAll()
 
+    @Query("DELETE FROM tasks WHERE isDone = 1")
+    suspend fun deleteCompleted()
+
     @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM tasks")
     suspend fun getNextPosition(): Int
 }

@@ -78,6 +78,7 @@
     <string name="task_select_time">Выбрать время</string>
     <string name="task_add_to_calendar">Добавить в Google Calendar</string>
     <string name="task_delete">Удалить задачу</string>
+    <string name="todo_clear_completed">Удалить выполненные</string>
 
     <!-- Calorie -->
     <string name="meal_breakfast">Завтрак</string>

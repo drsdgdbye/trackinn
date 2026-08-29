@@ -78,6 +78,7 @@
     <string name="task_select_time">Select time</string>
     <string name="task_add_to_calendar">Add to Google Calendar</string>
     <string name="task_delete">Delete task</string>
+    <string name="todo_clear_completed">Clear completed</string>
 
     <!-- Calorie -->
     <string name="meal_breakfast">Breakfast</string>
