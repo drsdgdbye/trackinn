@@ -93,4 +93,10 @@ dependencies {
     androidTestImplementation(libs.androidx.room.testing)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // Debug-инструмент android-bridge: подключается только когда AAR лежит локально
+    // (app/libs/app-embedded-bridge-debug.aar). На GitHub/CI файла нет — зависимость не добавляется.
+    if (file("libs/app-embedded-bridge-debug.aar").exists()) {
+        debugImplementation(files("libs/app-embedded-bridge-debug.aar"))
+    }
 }
