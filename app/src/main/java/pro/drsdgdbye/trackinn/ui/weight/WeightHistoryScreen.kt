@@ -28,6 +28,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
+import com.patrykandpatrick.vico.compose.cartesian.CartesianMeasuringContext
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
@@ -35,6 +37,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.decoration.Decoration
 import com.patrykandpatrick.vico.compose.cartesian.decoration.HorizontalLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.CartesianLayerDimensions
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
@@ -119,20 +122,24 @@ private fun WeightLineChart(
     val sorted = remember(entries) { entries.sortedBy { it.recordedAt } }
 
     val labels = remember(sorted, zone, chartLocale) {
-        val result = mutableListOf<String>()
+        sorted.map { entry ->
+            val date = Instant.ofEpochMilli(entry.recordedAt).atZone(zone).toLocalDate()
+            "${date.month.getDisplayName(TextStyle.SHORT, chartLocale)} ${date.year % 100}"
+        }
+    }
+
+    val labelIndices = remember(sorted, zone) {
+        val indices = mutableSetOf<Int>()
         var lastMonth: YearMonth? = null
-        for (entry in sorted) {
+        for ((index, entry) in sorted.withIndex()) {
             val date = Instant.ofEpochMilli(entry.recordedAt).atZone(zone).toLocalDate()
             val month = YearMonth.from(date)
-            val label = if (month == lastMonth) {
-                ""
-            } else {
-                "${date.month.getDisplayName(TextStyle.SHORT, chartLocale)} ${date.year % 100}"
+            if (month != lastMonth) {
+                indices.add(index)
+                lastMonth = month
             }
-            result.add(label)
-            lastMonth = month
         }
-        result
+        indices
     }
 
     val modelProducer = remember { CartesianChartModelProducer() }
@@ -148,15 +155,11 @@ private fun WeightLineChart(
     val valueFormatter = remember(labels) {
         CartesianValueFormatter { _, value, _ ->
             val index = value.toInt()
-            if (index in labels.indices) labels[index] else ""
+            if (index in labels.indices) labels[index] else " "
         }
     }
 
     val seriesColor = Color(0xFFF44336)
-    val line = rememberLineComponent(
-        fill = Fill(seriesColor),
-        thickness = 2.dp
-    )
     val point = rememberShapeComponent(
         fill = Fill(seriesColor),
         shape = CircleShape
@@ -194,7 +197,10 @@ private fun WeightLineChart(
         chart = rememberCartesianChart(
             lineLayer,
             startAxis = VerticalAxis.rememberStart(),
-            bottomAxis = HorizontalAxis.rememberBottom(valueFormatter = valueFormatter),
+            bottomAxis = HorizontalAxis.rememberBottom(
+                valueFormatter = valueFormatter,
+                itemPlacer = remember(labelIndices) { MonthStartItemPlacer(labelIndices) }
+            ),
             decorations = decorations
         ),
         modelProducer = modelProducer,
@@ -202,4 +208,45 @@ private fun WeightLineChart(
             .fillMaxSize()
             .height(260.dp)
     )
+}
+
+/** Подписывает на оси X только первую точку каждого месяца. */
+private class MonthStartItemPlacer(
+    private val labelIndices: Set<Int>
+) : HorizontalAxis.ItemPlacer {
+    override fun getLabelValues(
+        context: CartesianDrawingContext,
+        visibleXRange: ClosedFloatingPointRange<Double>,
+        fullXRange: ClosedFloatingPointRange<Double>,
+        maxLabelWidth: Float,
+    ): List<Double> = labelIndices
+        .map { it.toDouble() }
+        .filter { it >= visibleXRange.start - 1.0 && it <= visibleXRange.endInclusive + 1.0 }
+
+    override fun getWidthMeasurementLabelValues(
+        context: CartesianMeasuringContext,
+        layerDimensions: CartesianLayerDimensions,
+        fullXRange: ClosedFloatingPointRange<Double>,
+    ): List<Double> = labelIndices.map { it.toDouble() }
+
+    override fun getHeightMeasurementLabelValues(
+        context: CartesianMeasuringContext,
+        layerDimensions: CartesianLayerDimensions,
+        fullXRange: ClosedFloatingPointRange<Double>,
+        maxLabelWidth: Float,
+    ): List<Double> = labelIndices.map { it.toDouble() }
+
+    override fun getStartLayerMargin(
+        context: CartesianMeasuringContext,
+        layerDimensions: CartesianLayerDimensions,
+        tickThickness: Float,
+        maxLabelWidth: Float,
+    ): Float = 0f
+
+    override fun getEndLayerMargin(
+        context: CartesianMeasuringContext,
+        layerDimensions: CartesianLayerDimensions,
+        tickThickness: Float,
+        maxLabelWidth: Float,
+    ): Float = 0f
 }
