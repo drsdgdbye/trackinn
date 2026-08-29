@@ -170,11 +170,6 @@ private fun DishItem(dish: CompositeDishEntity, onClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(dish.name, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                "${dish.cookedWeightGrams}г",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

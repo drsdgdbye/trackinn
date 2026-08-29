@@ -17,12 +17,14 @@ import androidx.room.PrimaryKey
         ForeignKey(
             entity = ProductEntity::class,
             parentColumns = ["id"],
-            childColumns = ["productId"]
+            childColumns = ["productId"],
+            onDelete = ForeignKey.SET_NULL
         ),
         ForeignKey(
             entity = CompositeDishEntity::class,
             parentColumns = ["id"],
-            childColumns = ["compositeDishId"]
+            childColumns = ["compositeDishId"],
+            onDelete = ForeignKey.SET_NULL
         )
     ],
     indices = [

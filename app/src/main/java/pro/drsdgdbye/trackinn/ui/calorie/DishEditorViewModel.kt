@@ -25,7 +25,7 @@ import pro.drsdgdbye.trackinn.data.repository.ProductRepository
 
 data class IngredientRow(
     val id: Long = 0,
-    val productId: Long = 0,
+    val productId: Long? = null,
     val productName: String = "",
     val quantity: Int = 0,
     val position: Int = 0
@@ -131,7 +131,7 @@ class DishEditorViewModel(
         viewModelScope.launch {
             val dish = dishRepository.getById(dishId) ?: return@launch
             val ingredientEntities = dishRepository.getIngredientsList(dishId)
-            val productIds = ingredientEntities.map { it.productId }.distinct()
+            val productIds = ingredientEntities.map { it.productId }.filterNotNull().distinct()
             val productMap = productIds.associateWith { id ->
                 productRepository.getById(id)
             }

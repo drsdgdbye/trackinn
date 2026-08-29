@@ -17,7 +17,8 @@ import androidx.room.PrimaryKey
         ForeignKey(
             entity = ProductEntity::class,
             parentColumns = ["id"],
-            childColumns = ["productId"]
+            childColumns = ["productId"],
+            onDelete = ForeignKey.SET_NULL
         )
     ],
     indices = [
@@ -28,7 +29,7 @@ import androidx.room.PrimaryKey
 data class CompositeDishIngredientEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val dishId: Long,
-    val productId: Long,
+    val productId: Long?,
     val quantity: Int,
     val position: Int
 )

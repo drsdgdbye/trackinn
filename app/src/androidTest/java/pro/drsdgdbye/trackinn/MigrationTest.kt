@@ -55,7 +55,7 @@ class MigrationTest {
         }
 
         val roomDb = Room.databaseBuilder(context, TrackinnDatabase::class.java, TEST_DB)
-            .addMigrations(TrackinnDatabase.MIGRATION_1_2)
+            .addMigrations(TrackinnDatabase.MIGRATION_1_2, TrackinnDatabase.MIGRATION_2_3)
             .build()
 
         val products = runBlocking { roomDb.productDao().getAll().first() }
@@ -81,6 +81,58 @@ class MigrationTest {
         ).use { cursor ->
             assertTrue("daily_goals must be dropped", !cursor.moveToFirst())
         }
+        roomDb.close()
+    }
+
+    @Test
+    fun migrate2To3_nullsOrphanReferencesAndPreservesData() {
+        createDatabaseV1().use { db ->
+            db.execSQL(
+                "INSERT INTO products (name, category, unit, caloriesPer100, proteinPer100, fatPer100, carbsPer100) " +
+                    "VALUES ('Chicken', 'meat', 'GRAM', 120, 25, 3, 0)"
+            )
+            db.execSQL("INSERT INTO composite_dishes (name, dishType, cookedWeightGrams) VALUES ('Soup', 'SOUP', 500)")
+            db.execSQL("INSERT INTO meals (type, date) VALUES ('LUNCH', 1750000000000)")
+            db.execSQL(
+                "INSERT INTO meal_items (mealId, productId, compositeDishId, name, weight, calories) " +
+                    "VALUES (1, 1, 1, 'Soup', 250, 300)"
+            )
+            db.execSQL("INSERT INTO composite_dish_ingredients (dishId, productId, quantity, position) VALUES (1, 1, 200, 0)")
+        }
+
+        val roomDb = Room.databaseBuilder(context, TrackinnDatabase::class.java, TEST_DB)
+            .addMigrations(TrackinnDatabase.MIGRATION_1_2, TrackinnDatabase.MIGRATION_2_3)
+            .build()
+
+        val product = runBlocking { roomDb.productDao().getById(1) }!!
+        val dish = runBlocking { roomDb.compositeDishDao().getById(1) }!!
+        val meal = runBlocking { roomDb.mealDao().getAll().first() }[0]
+
+        // Deleting the product must null the references, not crash and not delete rows.
+        runBlocking { roomDb.productDao().delete(product) }
+
+        val ingredientsAfterProductDelete =
+            runBlocking { roomDb.compositeDishDao().getIngredientsList(dish.id) }
+        assertEquals(1, ingredientsAfterProductDelete.size)
+        assertEquals(null, ingredientsAfterProductDelete[0].productId)
+
+        val itemsAfterProductDelete = runBlocking { roomDb.mealDao().getItemsByMealIdList(meal.id) }
+        assertEquals(1, itemsAfterProductDelete.size)
+        assertEquals("Soup", itemsAfterProductDelete[0].name)
+        assertEquals(300, itemsAfterProductDelete[0].calories)
+        assertEquals(null, itemsAfterProductDelete[0].productId)
+        assertEquals(dish.id, itemsAfterProductDelete[0].compositeDishId)
+
+        // Deleting the dish must null the meal_item reference (its ingredients cascade-delete).
+        runBlocking { roomDb.compositeDishDao().delete(dish) }
+
+        val itemsAfterDishDelete = runBlocking { roomDb.mealDao().getItemsByMealIdList(meal.id) }
+        assertEquals(1, itemsAfterDishDelete.size)
+        assertEquals("Soup", itemsAfterDishDelete[0].name)
+        assertEquals(300, itemsAfterDishDelete[0].calories)
+        assertEquals(null, itemsAfterDishDelete[0].compositeDishId)
+        assertEquals(null, itemsAfterDishDelete[0].productId)
+
         roomDb.close()
     }
 

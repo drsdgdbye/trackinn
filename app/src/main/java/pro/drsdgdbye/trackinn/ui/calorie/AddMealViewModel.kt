@@ -100,7 +100,7 @@ class AddMealViewModel(
                     val dish = item.dish
                     val ingredients = dishRepository.getIngredientsList(dish.id)
                     if (ingredients.isNotEmpty() && dish.cookedWeightGrams > 0) {
-                        val productIds = ingredients.map { it.productId }.distinct()
+                        val productIds = ingredients.map { it.productId }.filterNotNull().distinct()
                         val productMap = productIds.associateWith { id ->
                             productRepository.getById(id)
                         }

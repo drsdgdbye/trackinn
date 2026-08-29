@@ -144,18 +144,6 @@ fun AddMealScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (weight.toIntOrNull() != null) {
-                    val w = weight.toInt()
-                    val calories = when (item) {
-                        is SearchResult.Product -> (w * item.product.caloriesPer100 / 100.0).toInt()
-                        is SearchResult.Dish -> 0
-                    }
-                    Text(
-                        stringResource(R.string.approx_calories, calories),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
