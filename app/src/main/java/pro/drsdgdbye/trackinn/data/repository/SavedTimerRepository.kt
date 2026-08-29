@@ -29,6 +29,8 @@ class SavedTimerRepository(
 
     suspend fun updateSession(session: MeditationSessionEntity) = meditationSessionDao.update(session)
 
+    suspend fun deleteAllSessions() = meditationSessionDao.deleteAll()
+
     suspend fun updatePositions(timers: List<SavedTimerEntity>) {
         timers.forEachIndexed { index, timer ->
             savedTimerDao.updatePosition(timer.id, index)

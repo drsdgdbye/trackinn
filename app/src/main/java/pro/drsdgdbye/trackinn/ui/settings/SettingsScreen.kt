@@ -57,10 +57,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
-import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import pro.drsdgdbye.trackinn.R
-import pro.drsdgdbye.trackinn.data.settings.SettingsRepository
 import pro.drsdgdbye.trackinn.data.settings.ThemeMode
 import pro.drsdgdbye.trackinn.data.export.ExportImportManager
 
@@ -76,9 +75,22 @@ private val colorPalette = listOf(
 @Composable
 fun SettingsScreen(onBack: () -> Unit = {}) {
     val context = LocalContext.current
-    val settings = remember { SettingsRepository(context) }
+    val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.Factory)
+    val settings = settingsViewModel.settingsRepository
     val scope = rememberCoroutineScope()
     val exportImportManager = remember { ExportImportManager(context) }
+
+    val pendingDisableModule by settingsViewModel.pendingDisableModule.collectAsState()
+    val showDisableConfirmDialog by settingsViewModel.showDisableConfirmDialog.collectAsState()
+    val wipeFailed by settingsViewModel.wipeFailed.collectAsState()
+
+    val strWipeFailed = stringResource(R.string.module_disable_error)
+    LaunchedEffect(wipeFailed) {
+        if (wipeFailed) {
+            Toast.makeText(context, strWipeFailed, Toast.LENGTH_LONG).show()
+            settingsViewModel.consumeWipeFailed()
+        }
+    }
 
     var showImportDialog by remember { mutableStateOf(false) }
 
@@ -176,10 +188,18 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 .padding(16.dp)
         ) {
             SectionTitle(stringResource(R.string.settings_modules))
-            ModuleToggle(stringResource(R.string.module_todo), moduleTodo) { scope.launch { settings.setModuleEnabled("todo", it) } }
-            ModuleToggle(stringResource(R.string.module_calories), moduleCalories) { scope.launch { settings.setModuleEnabled("calories", it) } }
-            ModuleToggle(stringResource(R.string.module_meditation), moduleMeditation) { scope.launch { settings.setModuleEnabled("meditation", it) } }
-            ModuleToggle(stringResource(R.string.module_weight), moduleWeight) { scope.launch { settings.setModuleEnabled("weight", it) } }
+            ModuleToggle(stringResource(R.string.module_todo), moduleTodo) { enabled ->
+                if (enabled) settingsViewModel.enable("todo") else settingsViewModel.requestDisable("todo")
+            }
+            ModuleToggle(stringResource(R.string.module_calories), moduleCalories) { enabled ->
+                if (enabled) settingsViewModel.enable("calories") else settingsViewModel.requestDisable("calories")
+            }
+            ModuleToggle(stringResource(R.string.module_meditation), moduleMeditation) { enabled ->
+                if (enabled) settingsViewModel.enable("meditation") else settingsViewModel.requestDisable("meditation")
+            }
+            ModuleToggle(stringResource(R.string.module_weight), moduleWeight) { enabled ->
+                if (enabled) settingsViewModel.enable("weight") else settingsViewModel.requestDisable("weight")
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(stringResource(R.string.settings_general))
@@ -290,6 +310,33 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 showColorPicker = false
             }
         )
+    }
+
+    if (showDisableConfirmDialog && pendingDisableModule != null) {
+        val messageRes = when (pendingDisableModule) {
+            "todo" -> R.string.module_disable_todo_message
+            "calories" -> R.string.module_disable_calories_message
+            "meditation" -> R.string.module_disable_meditation_message
+            "weight" -> R.string.module_disable_weight_message
+            else -> null
+        }
+        if (messageRes != null) {
+            AlertDialog(
+                onDismissRequest = settingsViewModel::cancelDisable,
+                title = { Text(stringResource(R.string.module_disable_title)) },
+                text = { Text(stringResource(messageRes)) },
+                confirmButton = {
+                    TextButton(onClick = settingsViewModel::confirmDisable) {
+                        Text(stringResource(R.string.module_disable_confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = settingsViewModel::cancelDisable) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
     }
 }
 

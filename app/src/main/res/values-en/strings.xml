@@ -37,6 +37,14 @@
     <string name="module_meditation">Meditation</string>
     <string name="module_weight">Weight</string>
 
+    <string name="module_disable_title">Disable module?</string>
+    <string name="module_disable_confirm">Disable</string>
+    <string name="module_disable_todo_message">Completed tasks will be deleted, active tasks will be kept. This action cannot be undone.</string>
+    <string name="module_disable_calories_message">Meal history will be deleted and stats reset. Your products and composite dishes will be kept. This action cannot be undone.</string>
+    <string name="module_disable_meditation_message">Session history will be deleted and stats reset. Saved timers will be kept. This action cannot be undone.</string>
+    <string name="module_disable_weight_message">All weight entries will be deleted and stats reset. This action cannot be undone.</string>
+    <string name="module_disable_error">Failed to disable the module. Please try again.</string>
+
     <string name="theme_label">Theme</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>

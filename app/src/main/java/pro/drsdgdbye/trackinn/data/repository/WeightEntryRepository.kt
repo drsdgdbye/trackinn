@@ -13,4 +13,6 @@ class WeightEntryRepository(private val weightEntryDao: WeightEntryDao) {
     }
 
     suspend fun getCount(): Int = weightEntryDao.getCount()
+
+    suspend fun deleteAll() = weightEntryDao.deleteAll()
 }

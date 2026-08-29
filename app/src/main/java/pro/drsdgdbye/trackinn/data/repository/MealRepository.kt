@@ -29,6 +29,8 @@ class MealRepository(private val mealDao: MealDao) {
 
     suspend fun deleteItem(itemId: Long) = mealDao.deleteItem(itemId)
 
+    suspend fun deleteAll() = mealDao.deleteAll()
+
     companion object {
         fun startOfDay(millis: Long): Long {
             val cal = Calendar.getInstance()

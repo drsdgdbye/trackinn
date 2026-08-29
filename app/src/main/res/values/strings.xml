@@ -37,6 +37,14 @@
     <string name="module_meditation">Медитация</string>
     <string name="module_weight">Вес</string>
 
+    <string name="module_disable_title">Отключить модуль?</string>
+    <string name="module_disable_confirm">Отключить</string>
+    <string name="module_disable_todo_message">Выполненные задачи будут удалены, активные сохранятся. Это действие нельзя отменить.</string>
+    <string name="module_disable_calories_message">История приёмов пищи будет удалена, статистика обнулится. Список продуктов и составных блюд сохранится. Это действие нельзя отменить.</string>
+    <string name="module_disable_meditation_message">История сессий будет удалена, статистика обнулится. Сохранённые таймеры останутся. Это действие нельзя отменить.</string>
+    <string name="module_disable_weight_message">Все записи веса будут удалены, статистика обнулится. Это действие нельзя отменить.</string>
+    <string name="module_disable_error">Не удалось отключить модуль. Попробуйте ещё раз.</string>
+
     <string name="theme_label">Тема</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Тёмная</string>
