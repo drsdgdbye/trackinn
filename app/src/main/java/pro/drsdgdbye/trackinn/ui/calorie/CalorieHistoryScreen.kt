@@ -395,8 +395,8 @@ private fun CalorieHeatmap(dailyStats: List<DailyStat>, goal: Int) {
 
     val heatmapColors = listOf(
         Color(0xFFEBEDF0),
-        Color(0xFF4CAF50),
         Color(0xFFFFC107),
+        Color(0xFF4CAF50),
         Color(0xFFF44336)
     )
 
