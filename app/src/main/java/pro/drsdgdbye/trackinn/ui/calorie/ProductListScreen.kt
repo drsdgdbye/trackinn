@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -55,14 +56,20 @@ fun ProductListScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.product_list)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag("product.list.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddClick) {
+            FloatingActionButton(
+                onClick = onAddClick,
+                modifier = Modifier.testTag("product.list.add")
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.new_product))
             }
         }
@@ -79,6 +86,7 @@ fun ProductListScreen(
                 leadingIcon = { Icon(Icons.Default.Close, contentDescription = null) },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .testTag("product.list.search")
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 singleLine = true
             )
@@ -101,15 +109,21 @@ fun ProductListScreen(
             title = { Text(stringResource(R.string.delete_product)) },
             text = { Text(stringResource(R.string.delete_product_confirm, product.name)) },
             confirmButton = {
-                TextButton(onClick = {
-                    viewModel.deleteProduct(product)
-                    productToDelete = null
-                }) {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteProduct(product)
+                        productToDelete = null
+                    },
+                    modifier = Modifier.testTag("product.list.delete.confirm")
+                ) {
                     Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { productToDelete = null }) {
+                TextButton(
+                    onClick = { productToDelete = null },
+                    modifier = Modifier.testTag("product.list.delete.cancel")
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -126,6 +140,7 @@ private fun ProductItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("product.list.item.${product.id}.row")
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -139,7 +154,10 @@ private fun ProductItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        IconButton(onClick = onDelete) {
+        IconButton(
+            onClick = onDelete,
+            modifier = Modifier.testTag("product.list.item.${product.id}.delete")
+        ) {
             Icon(
                 Icons.Default.Close,
                 contentDescription = stringResource(R.string.delete),

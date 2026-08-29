@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -70,7 +71,10 @@ fun WeightScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.weight)) },
                 actions = {
-                    IconButton(onClick = onHistoryClick) {
+                    IconButton(
+                        onClick = onHistoryClick,
+                        modifier = Modifier.testTag("weight.history")
+                    ) {
                         Icon(Icons.Default.BarChart, contentDescription = stringResource(R.string.weight_history))
                     }
                 }
@@ -108,7 +112,9 @@ fun WeightScreen(
                         label = { Text(stringResource(R.string.weight_input_label)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("weight.input")
                     )
                     Button(
                         onClick = {
@@ -117,7 +123,8 @@ fun WeightScreen(
                                 inputText = ""
                             }
                         },
-                        enabled = isValid
+                        enabled = isValid,
+                        modifier = Modifier.testTag("weight.add")
                     ) {
                         Text(stringResource(R.string.weight_add))
                     }

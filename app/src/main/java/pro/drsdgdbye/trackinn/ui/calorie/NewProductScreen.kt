@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -63,15 +64,21 @@ fun ProductEditorScreen(
                     Text(stringResource(if (isEditMode) R.string.edit_product else R.string.new_product))
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag("product.editor.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     if (isEditMode) {
-                        IconButton(onClick = {
-                            viewModel.deleteProduct(onDelete)
-                        }) {
+                        IconButton(
+                            onClick = {
+                                viewModel.deleteProduct(onDelete)
+                            },
+                            modifier = Modifier.testTag("product.editor.delete")
+                        ) {
                             Icon(
                                 Icons.Default.Delete,
                                 contentDescription = stringResource(R.string.delete),
@@ -94,16 +101,26 @@ fun ProductEditorScreen(
                 value = name,
                 onValueChange = { viewModel.name.value = it },
                 label = { Text(stringResource(R.string.product_name)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("product.editor.name")
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(stringResource(R.string.unit_label))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(selected = unit == "GRAM", onClick = { viewModel.unit.value = "GRAM" })
+                RadioButton(
+                    selected = unit == "GRAM",
+                    onClick = { viewModel.unit.value = "GRAM" },
+                    modifier = Modifier.testTag("product.editor.unit.grams")
+                )
                 Text(stringResource(R.string.unit_grams))
-                RadioButton(selected = unit == "ML", onClick = { viewModel.unit.value = "ML" })
+                RadioButton(
+                    selected = unit == "ML",
+                    onClick = { viewModel.unit.value = "ML" },
+                    modifier = Modifier.testTag("product.editor.unit.ml")
+                )
                 Text(stringResource(R.string.unit_ml))
             }
 
@@ -114,25 +131,33 @@ fun ProductEditorScreen(
                 value = calories,
                 onValueChange = { viewModel.calories.value = it },
                 label = { Text(stringResource(R.string.calories_label)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("product.editor.calories")
             )
             OutlinedTextField(
                 value = protein,
                 onValueChange = { viewModel.protein.value = it },
                 label = { Text(stringResource(R.string.protein_short_label)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("product.editor.protein")
             )
             OutlinedTextField(
                 value = fat,
                 onValueChange = { viewModel.fat.value = it },
                 label = { Text(stringResource(R.string.fat_short_label)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("product.editor.fat")
             )
             OutlinedTextField(
                 value = carbs,
                 onValueChange = { viewModel.carbs.value = it },
                 label = { Text(stringResource(R.string.carbs_short_label)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("product.editor.carbs")
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -141,14 +166,18 @@ fun ProductEditorScreen(
                 value = category,
                 onValueChange = { viewModel.category.value = it },
                 label = { Text(stringResource(R.string.category_optional)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("product.editor.category")
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
             TextButton(
                 onClick = { viewModel.saveProduct(onSaved) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("product.editor.save")
             ) {
                 Text(stringResource(R.string.save))
             }

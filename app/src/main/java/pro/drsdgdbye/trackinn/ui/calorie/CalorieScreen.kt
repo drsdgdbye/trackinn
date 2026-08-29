@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -98,7 +99,10 @@ fun CalorieScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.calories_label)) },
                 actions = {
-                    IconButton(onClick = onHistoryClick) {
+                    IconButton(
+                        onClick = onHistoryClick,
+                        modifier = Modifier.testTag("calorie.history")
+                    ) {
                         Icon(Icons.Default.BarChart, contentDescription = stringResource(R.string.calorie_history))
                     }
                 }
@@ -108,10 +112,16 @@ fun CalorieScreen(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                FloatingActionButton(onClick = onProductListClick) {
+                FloatingActionButton(
+                    onClick = onProductListClick,
+                    modifier = Modifier.testTag("calorie.products")
+                ) {
                     Icon(Icons.Default.ShoppingCart, contentDescription = stringResource(R.string.product_list))
                 }
-                FloatingActionButton(onClick = onDishListClick) {
+                FloatingActionButton(
+                    onClick = onDishListClick,
+                    modifier = Modifier.testTag("calorie.dishes")
+                ) {
                     Icon(Icons.Default.Restaurant, contentDescription = stringResource(R.string.dishes))
                 }
             }
@@ -133,6 +143,7 @@ fun CalorieScreen(
                     val meal = meals.find { it.meal.type == type }
                     MealSection(
                         label = label,
+                        mealType = type,
                         meal = meal,
                         onAddClick = { onAddMealClick(type, today) },
                         onItemClick = { editingItem = it }
@@ -206,6 +217,7 @@ fun CalorieScreen(
 @Composable
 private fun MealSection(
     label: String,
+    mealType: String,
     meal: pro.drsdgdbye.trackinn.data.db.dao.MealWithItems?,
     onAddClick: () -> Unit,
     onItemClick: (MealItemEntity) -> Unit
@@ -226,7 +238,10 @@ private fun MealSection(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
-            IconButton(onClick = onAddClick) {
+            IconButton(
+                onClick = onAddClick,
+                modifier = Modifier.testTag("calorie.meal.${mealType.lowercase()}.add")
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add))
             }
         }
@@ -297,6 +312,7 @@ private fun MealSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .testTag("calorie.item.${item.id}.row")
                         .clickable { onItemClick(item) }
                         .padding(vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -370,7 +386,9 @@ private fun EditMealItemDialog(
                     onValueChange = { weightText = it },
                     label = { Text(stringResource(R.string.weight_gram)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("calorie.item.edit.weight")
                 )
                 if (weight != null && weight > 0) {
                     val newCalories = if (item.weight > 0) {
@@ -398,17 +416,24 @@ private fun EditMealItemDialog(
                 onClick = {
                     weight?.takeIf { it > 0 }?.let(onSave)
                 },
-                enabled = weight != null && weight > 0
+                enabled = weight != null && weight > 0,
+                modifier = Modifier.testTag("calorie.item.edit.save")
             ) {
                 Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
             Row {
-                TextButton(onClick = onDelete) {
+                TextButton(
+                    onClick = onDelete,
+                    modifier = Modifier.testTag("calorie.item.edit.delete")
+                ) {
                     Text(stringResource(R.string.delete))
                 }
-                TextButton(onClick = onDismiss) {
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.testTag("calorie.item.edit.cancel")
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }

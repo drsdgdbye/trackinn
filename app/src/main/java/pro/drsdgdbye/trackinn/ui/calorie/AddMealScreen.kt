@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -73,7 +74,10 @@ fun AddMealScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.add_to_meal, mealTypeLabel(mealType))) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag("addmeal.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
@@ -85,7 +89,8 @@ fun AddMealScreen(
                     val w = weight.toIntOrNull() ?: return@FloatingActionButton
                     val item = selectedResult ?: return@FloatingActionButton
                     viewModel.addItem(mealType, date, item, w) { onItemAdded() }
-                }
+                },
+                modifier = Modifier.testTag("addmeal.confirm")
             ) {
                 Icon(Icons.Default.Check, contentDescription = stringResource(R.string.add))
             }
@@ -104,7 +109,9 @@ fun AddMealScreen(
                     viewModel.setSearchQuery(it)
                 },
                 placeholder = { Text(stringResource(R.string.search_product)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("addmeal.search")
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -142,7 +149,9 @@ fun AddMealScreen(
                     value = weight,
                     onValueChange = { weight = it },
                     label = { Text(stringResource(R.string.weight_gram)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("addmeal.weight")
                 )
 
                 if (weightValue > 0) {
@@ -170,7 +179,10 @@ fun AddMealScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             if (searchQuery.isNotBlank() && searchResults.isEmpty()) {
-                TextButton(onClick = { showCreateDialog = true }) {
+                TextButton(
+                    onClick = { showCreateDialog = true },
+                    modifier = Modifier.testTag("addmeal.create.product")
+                ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Text(stringResource(R.string.create_new_product))
                 }
@@ -178,9 +190,14 @@ fun AddMealScreen(
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(searchResults) { result ->
+                    val resultTag = when (result) {
+                        is SearchResult.Product -> "addmeal.result.product.${result.product.id}"
+                        is SearchResult.Dish -> "addmeal.result.dish.${result.dish.id}"
+                    }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .testTag(resultTag)
                             .clickable {
                                 selectedResult = result
                                 weight = when (result) {
@@ -261,31 +278,41 @@ private fun CreateProductDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.product_name)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("addmeal.product.new.name")
                 )
                 OutlinedTextField(
                     value = calories,
                     onValueChange = { calories = it },
                     label = { Text(stringResource(R.string.calories_per_100g_label)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("addmeal.product.new.calories")
                 )
                 OutlinedTextField(
                     value = protein,
                     onValueChange = { protein = it },
                     label = { Text(stringResource(R.string.protein_per_100g)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("addmeal.product.new.protein")
                 )
                 OutlinedTextField(
                     value = fat,
                     onValueChange = { fat = it },
                     label = { Text(stringResource(R.string.fat_per_100g)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("addmeal.product.new.fat")
                 )
                 OutlinedTextField(
                     value = carbs,
                     onValueChange = { carbs = it },
                     label = { Text(stringResource(R.string.carbs_per_100g)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("addmeal.product.new.carbs")
                 )
             }
         },
@@ -310,13 +337,17 @@ private fun CreateProductDialog(
                             onCreated(product)
                         }
                     }
-                }
+                },
+                modifier = Modifier.testTag("addmeal.product.new.create")
             ) {
                 Text(stringResource(R.string.create))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag("addmeal.product.new.cancel")
+            ) {
                 Text(stringResource(R.string.cancel))
             }
         }

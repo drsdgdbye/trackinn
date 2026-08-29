@@ -44,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -126,13 +127,19 @@ fun DishEditorScreen(
             TopAppBar(
                 title = { Text(if (dishId > 0) stringResource(R.string.edit_dish) else stringResource(R.string.new_dish)) },
                 navigationIcon = {
-                    IconButton(onClick = { requestExit() }) {
+                    IconButton(
+                        onClick = { requestExit() },
+                        modifier = Modifier.testTag("dish.editor.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
                     if (dishId > 0) {
-                        IconButton(onClick = { showDeleteDialog = true }) {
+                        IconButton(
+                            onClick = { showDeleteDialog = true },
+                            modifier = Modifier.testTag("dish.editor.delete")
+                        ) {
                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
                         }
                     }
@@ -151,7 +158,9 @@ fun DishEditorScreen(
                 value = dishName,
                 onValueChange = { viewModel.dishName.value = it },
                 label = { Text(stringResource(R.string.dish_name)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("dish.editor.name")
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -169,6 +178,7 @@ fun DishEditorScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor()
+                        .testTag("dish.editor.type")
                 )
                 ExposedDropdownMenu(
                     expanded = typeExpanded,
@@ -192,7 +202,9 @@ fun DishEditorScreen(
                 value = cookedWeight,
                 onValueChange = { viewModel.cookedWeight.value = it },
                 label = { Text(stringResource(R.string.dish_weight)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("dish.editor.weight")
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -206,7 +218,9 @@ fun DishEditorScreen(
                     viewModel.setProductSearchQuery(it)
                 },
                 placeholder = { Text(stringResource(R.string.search_product_hint)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("dish.editor.search")
             )
 
             if (productSearchResults.isNotEmpty()) {
@@ -219,6 +233,7 @@ fun DishEditorScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .testTag("dish.editor.search.result.${product.id}")
                                 .clickable {
                                     viewModel.addIngredient(product)
                                 }
@@ -236,7 +251,10 @@ fun DishEditorScreen(
 
             if (productSearchQuery.isNotBlank() && productSearchResults.isEmpty()) {
                 var showCreateDialog by remember { mutableStateOf(false) }
-                TextButton(onClick = { showCreateDialog = true }) {
+                TextButton(
+                    onClick = { showCreateDialog = true },
+                    modifier = Modifier.testTag("dish.editor.create.product")
+                ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(Modifier.width(4.dp))
                     Text(stringResource(R.string.create_product_format, productSearchQuery))
@@ -288,15 +306,21 @@ fun DishEditorScreen(
             title = { Text(stringResource(R.string.delete_dish)) },
             text = { Text(stringResource(R.string.delete_dish_confirm)) },
             confirmButton = {
-                TextButton(onClick = {
-                    viewModel.deleteDish(dishId) { onSaved() }
-                    showDeleteDialog = false
-                }) {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteDish(dishId) { onSaved() }
+                        showDeleteDialog = false
+                    },
+                    modifier = Modifier.testTag("dish.editor.delete.confirm")
+                ) {
                     Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
+                TextButton(
+                    onClick = { showDeleteDialog = false },
+                    modifier = Modifier.testTag("dish.editor.delete.cancel")
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -309,16 +333,25 @@ fun DishEditorScreen(
             title = { Text(stringResource(R.string.save_changes_title)) },
             text = { Text(stringResource(R.string.save_changes_message)) },
             confirmButton = {
-                TextButton(onClick = { saveAndExit() }) {
+                TextButton(
+                    onClick = { saveAndExit() },
+                    modifier = Modifier.testTag("dish.editor.save.exit")
+                ) {
                     Text(stringResource(R.string.save_and_exit))
                 }
             },
             dismissButton = {
                 Row {
-                    TextButton(onClick = { onBack() }) {
+                    TextButton(
+                        onClick = { onBack() },
+                        modifier = Modifier.testTag("dish.editor.save.discard")
+                    ) {
                         Text(stringResource(R.string.discard_changes))
                     }
-                    TextButton(onClick = { showExitDialog = false }) {
+                    TextButton(
+                        onClick = { showExitDialog = false },
+                        modifier = Modifier.testTag("dish.editor.save.cancel")
+                    ) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -348,10 +381,15 @@ private fun IngredientRowItem(
         OutlinedTextField(
             value = row.quantity.toString(),
             onValueChange = { onQuantityChange(it.toIntOrNull() ?: 0) },
-            modifier = Modifier.width(80.dp),
+            modifier = Modifier
+                .width(80.dp)
+                .testTag("dish.editor.ingredient.${row.id}.quantity"),
             label = { Text(stringResource(R.string.gram_short)) }
         )
-        IconButton(onClick = onRemove) {
+        IconButton(
+            onClick = onRemove,
+            modifier = Modifier.testTag("dish.editor.ingredient.${row.id}.remove")
+        ) {
             Icon(Icons.Default.Close, contentDescription = stringResource(R.string.delete))
         }
     }
@@ -379,25 +417,33 @@ private fun CreateProductDialog(
                     value = calories,
                     onValueChange = { calories = it },
                     label = { Text(stringResource(R.string.calories_per_100g_label)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("dish.editor.product.new.calories")
                 )
                 OutlinedTextField(
                     value = protein,
                     onValueChange = { protein = it },
                     label = { Text(stringResource(R.string.protein_per_100g)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("dish.editor.product.new.protein")
                 )
                 OutlinedTextField(
                     value = fat,
                     onValueChange = { fat = it },
                     label = { Text(stringResource(R.string.fat_per_100g)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("dish.editor.product.new.fat")
                 )
                 OutlinedTextField(
                     value = carbs,
                     onValueChange = { carbs = it },
                     label = { Text(stringResource(R.string.carbs_per_100g)) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("dish.editor.product.new.carbs")
                 )
             }
         },
@@ -410,13 +456,17 @@ private fun CreateProductDialog(
                         fat.toIntOrNull() ?: 0,
                         carbs.toIntOrNull() ?: 0
                     )
-                }
+                },
+                modifier = Modifier.testTag("dish.editor.product.new.create")
             ) {
                 Text(stringResource(R.string.create))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag("dish.editor.product.new.cancel")
+            ) {
                 Text(stringResource(R.string.cancel))
             }
         }

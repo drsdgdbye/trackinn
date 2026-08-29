@@ -36,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -99,7 +100,10 @@ fun TimerEditorScreen(
             TopAppBar(
                 title = { Text(if (isNew) stringResource(R.string.timer_new) else stringResource(R.string.timer_edit)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag("timer.editor.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
@@ -118,32 +122,40 @@ fun TimerEditorScreen(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text(stringResource(R.string.timer_name)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("timer.editor.name")
             )
             OutlinedTextField(
                 value = totalMinutes,
                 onValueChange = { totalMinutes = it },
                 label = { Text(stringResource(R.string.timer_total_minutes)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("timer.editor.minutes")
             )
             OutlinedTextField(
                 value = prepSeconds,
                 onValueChange = { prepSeconds = it },
                 label = { Text(stringResource(R.string.timer_prep_seconds)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("timer.editor.prep")
             )
             OutlinedTextField(
                 value = checkpoints,
                 onValueChange = { checkpoints = it },
                 label = { Text(stringResource(R.string.timer_checkpoints)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("timer.editor.checkpoints")
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SoundDropdown(stringResource(R.string.sound_start), startSound, sounds) { startSound = it }
-            SoundDropdown(stringResource(R.string.sound_end), endSound, sounds) { endSound = it }
-            SoundDropdown(stringResource(R.string.sound_checkpoint), checkpointSound, sounds) { checkpointSound = it }
+            SoundDropdown(stringResource(R.string.sound_start), startSound, sounds, "timer.editor.sound.start") { startSound = it }
+            SoundDropdown(stringResource(R.string.sound_end), endSound, sounds, "timer.editor.sound.end") { endSound = it }
+            SoundDropdown(stringResource(R.string.sound_checkpoint), checkpointSound, sounds, "timer.editor.sound.checkpoint") { checkpointSound = it }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -156,7 +168,9 @@ fun TimerEditorScreen(
                         onBack()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("timer.editor.delete")
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null)
                     Text(stringResource(R.string.timer_delete_label))
@@ -208,7 +222,9 @@ fun TimerEditorScreen(
                     }
                     onBack()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("timer.editor.save")
             ) {
                 Text(stringResource(R.string.save))
             }
@@ -218,7 +234,7 @@ fun TimerEditorScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SoundDropdown(label: String, current: String, options: List<String>, onSelect: (String) -> Unit) {
+private fun SoundDropdown(label: String, current: String, options: List<String>, testTag: String, onSelect: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
         OutlinedTextField(
@@ -230,6 +246,7 @@ private fun SoundDropdown(label: String, current: String, options: List<String>,
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .testTag(testTag)
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->

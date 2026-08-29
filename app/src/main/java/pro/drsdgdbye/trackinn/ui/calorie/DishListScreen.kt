@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -68,14 +69,20 @@ fun DishListScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.dishes)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag("dish.list.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddClick) {
+            FloatingActionButton(
+                onClick = onAddClick,
+                modifier = Modifier.testTag("dish.list.add")
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_dish))
             }
         }
@@ -91,13 +98,17 @@ fun DishListScreen(
                 placeholder = { Text(stringResource(R.string.search_dish)) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.setSearchQuery("") }) {
+                        IconButton(
+                            onClick = { viewModel.setSearchQuery("") },
+                            modifier = Modifier.testTag("dish.list.search.clear")
+                        ) {
                             Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
                         }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .testTag("dish.list.search")
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
@@ -110,7 +121,9 @@ fun DishListScreen(
                     selected = selectedType == null,
                     onClick = { viewModel.setSelectedType(null) },
                     label = { Text(stringResource(R.string.filter_all)) },
-                    modifier = Modifier.padding(end = 4.dp)
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .testTag("dish.list.filter.all")
                 )
                 viewModel.dishTypes.forEach { type ->
                     FilterChip(
@@ -119,7 +132,9 @@ fun DishListScreen(
                             viewModel.setSelectedType(if (selectedType == type) null else type)
                         },
                         label = { Text(dishTypeLabel(type)) },
-                        modifier = Modifier.padding(end = 4.dp)
+                        modifier = Modifier
+                            .padding(end = 4.dp)
+                            .testTag("dish.list.filter.${type.lowercase()}")
                     )
                 }
             }
@@ -163,6 +178,7 @@ private fun DishItem(dish: CompositeDishEntity, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("dish.list.item.${dish.id}.row")
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,

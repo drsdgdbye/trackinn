@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
@@ -90,7 +91,10 @@ fun TaskDetailScreen(
             TopAppBar(
                 title = { Text(if (isNew) stringResource(R.string.task_new) else stringResource(R.string.task_edit)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag("task.detail.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
@@ -107,7 +111,9 @@ fun TaskDetailScreen(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text(stringResource(R.string.task_title)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("task.detail.title")
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -120,7 +126,9 @@ fun TaskDetailScreen(
                 if (dueDate != null) {
                     Text(
                         text = dateFormat.format(Date(dueDate!!)),
-                        modifier = Modifier.clickable {
+                        modifier = Modifier
+                            .testTag("task.detail.due.date")
+                            .clickable {
                             val cal = Calendar.getInstance().apply { timeInMillis = dueDate!! }
                             DatePickerDialog(
                                 activityContext,
@@ -134,11 +142,15 @@ fun TaskDetailScreen(
                             ).show()
                         }
                     )
-                    IconButton(onClick = { dueDate = null }) {
+                    IconButton(
+                        onClick = { dueDate = null },
+                        modifier = Modifier.testTag("task.detail.due.date.clear")
+                    ) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
                     }
                 } else {
-                    IconButton(onClick = {
+                    IconButton(
+                        onClick = {
                         val cal = Calendar.getInstance()
                         DatePickerDialog(
                             activityContext,
@@ -150,7 +162,9 @@ fun TaskDetailScreen(
                             cal.get(Calendar.MONTH),
                             cal.get(Calendar.DAY_OF_MONTH)
                         ).show()
-                    }) {
+                    },
+                        modifier = Modifier.testTag("task.detail.due.date.pick")
+                    ) {
                         Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.task_select_date))
                     }
                 }
@@ -164,7 +178,9 @@ fun TaskDetailScreen(
                 if (dueTime != null) {
                     Text(
                         text = timeFormat.format(Date(dueTime!!)),
-                        modifier = Modifier.clickable {
+                        modifier = Modifier
+                            .testTag("task.detail.due.time")
+                            .clickable {
                             val cal = Calendar.getInstance().apply { timeInMillis = dueTime!! }
                             TimePickerDialog(
                                 activityContext,
@@ -181,11 +197,15 @@ fun TaskDetailScreen(
                             ).show()
                         }
                     )
-                    IconButton(onClick = { dueTime = null }) {
+                    IconButton(
+                        onClick = { dueTime = null },
+                        modifier = Modifier.testTag("task.detail.due.time.clear")
+                    ) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
                     }
                 } else {
-                    IconButton(onClick = {
+                    IconButton(
+                        onClick = {
                         val cal = Calendar.getInstance()
                         TimePickerDialog(
                             activityContext,
@@ -200,7 +220,9 @@ fun TaskDetailScreen(
                             cal.get(Calendar.MINUTE),
                             true
                         ).show()
-                    }) {
+                    },
+                        modifier = Modifier.testTag("task.detail.due.time.pick")
+                    ) {
                         Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.task_select_time))
                     }
                 }
@@ -209,10 +231,16 @@ fun TaskDetailScreen(
             if (dueDate != null) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("task.detail.save")
+            ) {
                     Text(stringResource(R.string.task_add_to_calendar), modifier = Modifier.weight(1f))
-                    Switch(checked = addToCalendar, onCheckedChange = { addToCalendar = it })
+                    Switch(
+                        checked = addToCalendar,
+                        onCheckedChange = { addToCalendar = it },
+                        modifier = Modifier.testTag("task.detail.calendar")
+                    )
                 }
             }
 
@@ -227,7 +255,9 @@ fun TaskDetailScreen(
                         onBack()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("task.detail.delete")
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null)
                     Text(stringResource(R.string.task_delete))

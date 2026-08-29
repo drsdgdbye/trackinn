@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -98,7 +99,10 @@ fun TrackinnRoot() {
                 TopAppBar(
                     title = { Text(stringResource(R.string.app_title)) },
                     actions = {
-                        IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
+                        IconButton(
+                            onClick = { navController.navigate(Screen.Settings.route) },
+                            modifier = Modifier.testTag("nav.settings")
+                        ) {
                             Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                         }
                     }
@@ -109,7 +113,15 @@ fun TrackinnRoot() {
             if (enabledItems.isNotEmpty()) {
                 NavigationBar {
                     enabledItems.forEach { item ->
+                        val tabTag = when (item.screen) {
+                            Screen.Todo -> "nav.tab.todo"
+                            Screen.Calorie -> "nav.tab.calorie"
+                            Screen.Meditation -> "nav.tab.meditation"
+                            Screen.Weight -> "nav.tab.weight"
+                            else -> null
+                        }
                         NavigationBarItem(
+                            modifier = tabTag?.let { Modifier.testTag(it) } ?: Modifier,
                             icon = { Icon(item.icon, contentDescription = null) },
                             label = { Text(stringResource(item.label)) },
                             selected = currentRoute == item.screen.route,

@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -119,7 +120,10 @@ fun MeditationHistoryScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.meditation_history)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag("meditation.history.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
@@ -136,10 +140,16 @@ fun MeditationHistoryScreen(
             item {
                 PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
                     periodLabels.forEachIndexed { index, label ->
+                        val tabTag = when (periods[index]) {
+                            StatsPeriod.WEEK -> "meditation.history.tab.week"
+                            StatsPeriod.MONTH -> "meditation.history.tab.month"
+                            StatsPeriod.YEAR -> "meditation.history.tab.year"
+                        }
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
-                            text = { Text(label) }
+                            text = { Text(label) },
+                            modifier = Modifier.testTag(tabTag)
                         )
                     }
                 }
@@ -454,17 +464,25 @@ private fun DateFilterRow(
             if (startDate != null) {
                 Text(
                     text = dateFormat.format(Date(startDate)),
-                    modifier = Modifier.clickable {
+                    modifier = Modifier
+                        .testTag("meditation.history.date.from")
+                        .clickable {
                         showDatePicker(activityContext, startDate) { onStartChanged(it) }
                     }
                 )
-                IconButton(onClick = { onStartChanged(null) }) {
+                IconButton(
+                    onClick = { onStartChanged(null) },
+                    modifier = Modifier.testTag("meditation.history.date.from.clear")
+                ) {
                     Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
                 }
             } else {
-                IconButton(onClick = {
+                IconButton(
+                    onClick = {
                     showDatePicker(activityContext, null) { onStartChanged(it) }
-                }) {
+                },
+                    modifier = Modifier.testTag("meditation.history.date.from.pick")
+                ) {
                     Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.task_select_date))
                 }
             }
@@ -474,17 +492,25 @@ private fun DateFilterRow(
             if (endDate != null) {
                 Text(
                     text = dateFormat.format(Date(endDate)),
-                    modifier = Modifier.clickable {
+                    modifier = Modifier
+                        .testTag("meditation.history.date.to")
+                        .clickable {
                         showDatePicker(activityContext, endDate) { onEndChanged(it) }
                     }
                 )
-                IconButton(onClick = { onEndChanged(null) }) {
+                IconButton(
+                    onClick = { onEndChanged(null) },
+                    modifier = Modifier.testTag("meditation.history.date.to.clear")
+                ) {
                     Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
                 }
             } else {
-                IconButton(onClick = {
+                IconButton(
+                    onClick = {
                     showDatePicker(activityContext, null) { onEndChanged(it) }
-                }) {
+                },
+                    modifier = Modifier.testTag("meditation.history.date.to.pick")
+                ) {
                     Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.task_select_date))
                 }
             }

@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,10 +60,13 @@ fun TimerRunningScreen(
             TopAppBar(
                 title = { Text(uiState.timer?.name ?: stringResource(R.string.meditation)) },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        viewModel.stopTimer()
-                        onBack()
-                    }) {
+                    IconButton(
+                        onClick = {
+                            viewModel.stopTimer()
+                            onBack()
+                        },
+                        modifier = Modifier.testTag("timer.running.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
@@ -129,18 +133,27 @@ fun TimerRunningScreen(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         if (uiState.state == TimerState.RUNNING) {
-                            Button(onClick = { viewModel.pauseTimer() }) {
+                            Button(
+                                onClick = { viewModel.pauseTimer() },
+                                modifier = Modifier.testTag("timer.running.pause")
+                            ) {
                                 Text(stringResource(R.string.timer_pause))
                             }
                         } else {
-                            Button(onClick = { viewModel.resumeTimer() }) {
+                            Button(
+                                onClick = { viewModel.resumeTimer() },
+                                modifier = Modifier.testTag("timer.running.resume")
+                            ) {
                                 Text(stringResource(R.string.timer_resume))
                             }
                         }
-                        Button(onClick = {
-                            viewModel.stopTimer()
-                            onBack()
-                        }) {
+                        Button(
+                            onClick = {
+                                viewModel.stopTimer()
+                                onBack()
+                            },
+                            modifier = Modifier.testTag("timer.running.stop")
+                        ) {
                             Text(stringResource(R.string.timer_stop))
                         }
                     }
@@ -148,10 +161,13 @@ fun TimerRunningScreen(
                 TimerState.COMPLETED -> {
                     Text(stringResource(R.string.timer_done), fontSize = 32.sp)
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
-                        viewModel.resetCompleted()
-                        onBack()
-                    }) {
+                    Button(
+                        onClick = {
+                            viewModel.resetCompleted()
+                            onBack()
+                        },
+                        modifier = Modifier.testTag("timer.running.close")
+                    ) {
                         Text(stringResource(R.string.close))
                     }
                 }

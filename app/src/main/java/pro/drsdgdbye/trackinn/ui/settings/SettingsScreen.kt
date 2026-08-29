@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
@@ -173,7 +174,10 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.testTag("settings.back")
+                    ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
@@ -188,16 +192,16 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 .padding(16.dp)
         ) {
             SectionTitle(stringResource(R.string.settings_modules))
-            ModuleToggle(stringResource(R.string.module_todo), moduleTodo) { enabled ->
+            ModuleToggle(stringResource(R.string.module_todo), moduleTodo, "settings.module.todo") { enabled ->
                 if (enabled) settingsViewModel.enable("todo") else settingsViewModel.requestDisable("todo")
             }
-            ModuleToggle(stringResource(R.string.module_calories), moduleCalories) { enabled ->
+            ModuleToggle(stringResource(R.string.module_calories), moduleCalories, "settings.module.calories") { enabled ->
                 if (enabled) settingsViewModel.enable("calories") else settingsViewModel.requestDisable("calories")
             }
-            ModuleToggle(stringResource(R.string.module_meditation), moduleMeditation) { enabled ->
+            ModuleToggle(stringResource(R.string.module_meditation), moduleMeditation, "settings.module.meditation") { enabled ->
                 if (enabled) settingsViewModel.enable("meditation") else settingsViewModel.requestDisable("meditation")
             }
-            ModuleToggle(stringResource(R.string.module_weight), moduleWeight) { enabled ->
+            ModuleToggle(stringResource(R.string.module_weight), moduleWeight, "settings.module.weight") { enabled ->
                 if (enabled) settingsViewModel.enable("weight") else settingsViewModel.requestDisable("weight")
             }
 
@@ -211,44 +215,44 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(stringResource(R.string.settings_todo))
-            ColorSetting(stringResource(R.string.color_completed), completedTaskColor) {
+            ColorSetting(stringResource(R.string.color_completed), completedTaskColor, "settings.color.done") {
                 colorPickerTarget = pro.drsdgdbye.trackinn.data.settings.SettingsKeys.COMPLETED_TASK_COLOR
                 showColorPicker = true
             }
-            ColorSetting(stringResource(R.string.color_no_deadline), deadlineSafeColor, defaultColor = MaterialTheme.colorScheme.onSurface) {
+            ColorSetting(stringResource(R.string.color_no_deadline), deadlineSafeColor, "settings.color.deadline.safe", defaultColor = MaterialTheme.colorScheme.onSurface) {
                 colorPickerTarget = pro.drsdgdbye.trackinn.data.settings.SettingsKeys.DEADLINE_SAFE_COLOR
                 showColorPicker = true
             }
-            ColorSetting(stringResource(R.string.color_deadline_start), deadlineWarningColor) {
+            ColorSetting(stringResource(R.string.color_deadline_start), deadlineWarningColor, "settings.color.deadline.warning") {
                 colorPickerTarget = pro.drsdgdbye.trackinn.data.settings.SettingsKeys.DEADLINE_WARNING_COLOR
                 showColorPicker = true
             }
-            ColorSetting(stringResource(R.string.color_deadline_critical), deadlineDangerColor) {
+            ColorSetting(stringResource(R.string.color_deadline_critical), deadlineDangerColor, "settings.color.deadline.danger") {
                 colorPickerTarget = pro.drsdgdbye.trackinn.data.settings.SettingsKeys.DEADLINE_DANGER_COLOR
                 showColorPicker = true
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(stringResource(R.string.settings_calories))
-            NumberSetting(stringResource(R.string.daily_goal), caloriesDailyGoal) {
+            NumberSetting(stringResource(R.string.daily_goal), caloriesDailyGoal, "settings.daily.goal") {
                 scope.launch { settings.setCaloriesDailyGoal(it) }
             }
-            ColorSetting(stringResource(R.string.color_progress), progressBarColor) {
+            ColorSetting(stringResource(R.string.color_progress), progressBarColor, "settings.color.progress") {
                 colorPickerTarget = pro.drsdgdbye.trackinn.data.settings.SettingsKeys.PROGRESS_BAR_COLOR
                 showColorPicker = true
             }
-            ColorSetting(stringResource(R.string.color_approaching), approachingGoalColor) {
+            ColorSetting(stringResource(R.string.color_approaching), approachingGoalColor, "settings.color.near") {
                 colorPickerTarget = pro.drsdgdbye.trackinn.data.settings.SettingsKeys.APPROACHING_GOAL_COLOR
                 showColorPicker = true
             }
-            ColorSetting(stringResource(R.string.color_exceeding), exceedingGoalColor) {
+            ColorSetting(stringResource(R.string.color_exceeding), exceedingGoalColor, "settings.color.exceed") {
                 colorPickerTarget = pro.drsdgdbye.trackinn.data.settings.SettingsKeys.EXCEEDING_GOAL_COLOR
                 showColorPicker = true
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             SectionTitle(stringResource(R.string.settings_weight))
-            DecimalNumberSetting(stringResource(R.string.weight_target), weightTarget) {
+            DecimalNumberSetting(stringResource(R.string.weight_target), weightTarget, "settings.weight.target") {
                 scope.launch { settings.setWeightTarget(it) }
             }
             DayDropdown(
@@ -260,7 +264,9 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
             SectionTitle(stringResource(R.string.settings_data))
             Text(
                 stringResource(R.string.export_json),
-                modifier = Modifier.clickable {
+                modifier = Modifier
+                    .testTag("settings.export.json")
+                    .clickable {
                     scope.launch {
                         try {
                             val json = exportImportManager.exportToJson()
@@ -284,14 +290,18 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 stringResource(R.string.import_json),
-                modifier = Modifier.clickable {
+                modifier = Modifier
+                    .testTag("settings.import.json")
+                    .clickable {
                     importLauncher.launch(arrayOf("application/json"))
                 }
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 stringResource(R.string.import_products),
-                modifier = Modifier.clickable {
+                modifier = Modifier
+                    .testTag("settings.import.products")
+                    .clickable {
                     importProductsLauncher.launch(arrayOf("application/json"))
                 }
             )
@@ -326,12 +336,18 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 title = { Text(stringResource(R.string.module_disable_title)) },
                 text = { Text(stringResource(messageRes)) },
                 confirmButton = {
-                    TextButton(onClick = settingsViewModel::confirmDisable) {
+                    TextButton(
+                        onClick = settingsViewModel::confirmDisable,
+                        modifier = Modifier.testTag("settings.module.disable.confirm")
+                    ) {
                         Text(stringResource(R.string.module_disable_confirm))
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = settingsViewModel::cancelDisable) {
+                    TextButton(
+                        onClick = settingsViewModel::cancelDisable,
+                        modifier = Modifier.testTag("settings.module.disable.cancel")
+                    ) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -350,7 +366,7 @@ private fun SectionTitle(text: String) {
 }
 
 @Composable
-private fun ModuleToggle(label: String, enabled: Boolean, onToggle: (Boolean) -> Unit) {
+private fun ModuleToggle(label: String, enabled: Boolean, testTag: String, onToggle: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -359,7 +375,11 @@ private fun ModuleToggle(label: String, enabled: Boolean, onToggle: (Boolean) ->
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(label)
-        Switch(checked = enabled, onCheckedChange = onToggle)
+        Switch(
+            checked = enabled,
+            onCheckedChange = onToggle,
+            modifier = Modifier.testTag(testTag)
+        )
     }
 }
 
@@ -381,6 +401,7 @@ private fun ThemeDropdown(current: ThemeMode, onSelect: (ThemeMode) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .testTag("settings.theme")
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(text = { Text(stringResource(R.string.theme_system)) }, onClick = { onSelect(ThemeMode.SYSTEM); expanded = false })
@@ -408,6 +429,7 @@ private fun LanguageDropdown(current: String?, onSelect: (String?) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .testTag("settings.language")
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(text = { Text(stringResource(R.string.language_system)) }, onClick = { onSelect(null); expanded = false })
@@ -418,13 +440,14 @@ private fun LanguageDropdown(current: String?, onSelect: (String?) -> Unit) {
 }
 
 @Composable
-private fun ColorSetting(label: String, hexColor: String?, defaultColor: Color = Color.Gray, onClick: () -> Unit) {
+private fun ColorSetting(label: String, hexColor: String?, testTag: String, defaultColor: Color = Color.Gray, onClick: () -> Unit) {
     val color = hexColor?.let {
         try { Color(it.toColorInt()) } catch (e: Exception) { defaultColor }
     } ?: defaultColor
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag(testTag)
             .padding(vertical = 4.dp)
             .clickable(onClick = onClick),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -442,7 +465,7 @@ private fun ColorSetting(label: String, hexColor: String?, defaultColor: Color =
 }
 
 @Composable
-private fun NumberSetting(label: String, value: Int, onChange: (Int) -> Unit) {
+private fun NumberSetting(label: String, value: Int, testTag: String, onChange: (Int) -> Unit) {
     var text by remember { mutableStateOf(value.toString()) }
     LaunchedEffect(value) {
         text = value.toString()
@@ -461,13 +484,15 @@ private fun NumberSetting(label: String, value: Int, onChange: (Int) -> Unit) {
                 text = it
                 it.toIntOrNull()?.let(onChange)
             },
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier
+                .width(100.dp)
+                .testTag(testTag)
         )
     }
 }
 
 @Composable
-private fun DecimalNumberSetting(label: String, value: Float, onChange: (Float) -> Unit) {
+private fun DecimalNumberSetting(label: String, value: Float, testTag: String, onChange: (Float) -> Unit) {
     var text by remember { mutableStateOf(value.toString()) }
     LaunchedEffect(value) {
         text = value.toString()
@@ -487,7 +512,9 @@ private fun DecimalNumberSetting(label: String, value: Float, onChange: (Float) 
                 it.replace(",", ".").toFloatOrNull()?.let(onChange)
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier
+                .width(100.dp)
+                .testTag(testTag)
         )
     }
 }
@@ -516,6 +543,7 @@ private fun DayDropdown(selectedDay: Int, onDaySelected: (Int) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .testTag("settings.weighday")
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             days.forEach { (calendarDay, labelRes) ->
@@ -560,15 +588,21 @@ fun ColorPickerDialog(onDismiss: () -> Unit, onColorSelected: (String) -> Unit) 
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                val hex = String.format("#%06X", 0xFFFFFF and selectedColor.hashCode())
-                onColorSelected(hex)
-            }) {
+            TextButton(
+                onClick = {
+                    val hex = String.format("#%06X", 0xFFFFFF and selectedColor.hashCode())
+                    onColorSelected(hex)
+                },
+                modifier = Modifier.testTag("settings.color.picker.confirm")
+            ) {
                 Text(stringResource(R.string.pick_color_confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag("settings.color.picker.cancel")
+            ) {
                 Text(stringResource(R.string.cancel))
             }
         }

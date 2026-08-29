@@ -30,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pro.drsdgdbye.trackinn.R
@@ -60,14 +61,20 @@ fun MeditationScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.meditation)) },
                 actions = {
-                    IconButton(onClick = onHistoryClick) {
+                    IconButton(
+                        onClick = onHistoryClick,
+                        modifier = Modifier.testTag("meditation.history")
+                    ) {
                         Icon(Icons.Default.BarChart, contentDescription = stringResource(R.string.meditation_history))
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddClick) {
+            FloatingActionButton(
+                onClick = onAddClick,
+                modifier = Modifier.testTag("meditation.add")
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_timer))
             }
         }
@@ -106,6 +113,7 @@ private fun TimerItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("meditation.timer.${timer.id}.item")
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -123,11 +131,18 @@ private fun TimerItem(
             Icons.Default.DragHandle,
             contentDescription = null,
             modifier = dragHandleModifier
+                .testTag("meditation.timer.${timer.id}.drag")
         )
-        IconButton(onClick = onStart) {
+        IconButton(
+            onClick = onStart,
+            modifier = Modifier.testTag("meditation.timer.${timer.id}.start")
+        ) {
             Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.timer_start))
         }
-        IconButton(onClick = onDelete) {
+        IconButton(
+            onClick = onDelete,
+            modifier = Modifier.testTag("meditation.timer.${timer.id}.delete")
+        ) {
             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.timer_delete))
         }
     }

@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -166,14 +167,20 @@ fun TodoScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.module_todo)) },
                 actions = {
-                    IconButton(onClick = { viewModel.deleteCompleted() }) {
+                    IconButton(
+                        onClick = { viewModel.deleteCompleted() },
+                        modifier = Modifier.testTag("todo.completed.clear")
+                    ) {
                         Icon(Icons.Default.DeleteSweep, contentDescription = stringResource(R.string.todo_clear_completed))
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddClick) {
+            FloatingActionButton(
+                onClick = onAddClick,
+                modifier = Modifier.testTag("todo.add")
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.todo_add))
             }
         }
@@ -222,13 +229,15 @@ private fun TaskItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("todo.task.${task.id}.item")
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
             checked = task.isDone,
-            onCheckedChange = { onToggle() }
+            onCheckedChange = { onToggle() },
+            modifier = Modifier.testTag("todo.task.${task.id}.toggle")
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -256,7 +265,9 @@ private fun TaskItem(
         Icon(
             Icons.Default.DragHandle,
             contentDescription = stringResource(R.string.todo_add),
-            modifier = dragHandleModifier.padding(start = 8.dp)
+            modifier = dragHandleModifier
+                .testTag("todo.task.${task.id}.drag")
+                .padding(start = 8.dp)
         )
     }
 }
