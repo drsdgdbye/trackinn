@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -569,20 +570,23 @@ fun ColorPickerDialog(onDismiss: () -> Unit, onColorSelected: (String) -> Unit) 
             Column {
                 Text(stringResource(R.string.pick_color_confirm) + ": ${String.format("#%06X", 0xFFFFFF and selectedColor.hashCode())}")
                 Spacer(modifier = Modifier.height(8.dp))
-                for (row in colorPalette.chunked(8)) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    ) {
-                        row.forEach { color ->
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(color)
-                                    .clickable { selectedColor = color }
-                            )
-                        }
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    colorPalette.forEach { color ->
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .then(
+                                    if (color == selectedColor) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                    else Modifier
+                                )
+                                .background(color)
+                                .clickable { selectedColor = color }
+                        )
                     }
                 }
             }

@@ -126,6 +126,9 @@ fun TrackinnRoot() {
                             label = { Text(stringResource(item.label)) },
                             selected = currentRoute == item.screen.route,
                             onClick = {
+                                if (currentRoute !in mainRoutes) {
+                                    navController.popBackStack()
+                                }
                                 navController.navigate(item.screen.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
