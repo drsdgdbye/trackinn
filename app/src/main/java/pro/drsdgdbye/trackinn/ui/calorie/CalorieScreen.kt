@@ -479,27 +479,29 @@ private fun MacroRatioBar(
     val proteinColor = Color(0xFF2196F3)
     val fatColor = Color(0xFFF44336)
     val carbsColor = Color(0xFFFFEB3B)
+    val segments = listOf(
+        protein to proteinColor,
+        fat to fatColor,
+        carbs to carbsColor
+    ).filter { it.first > 0 }
     Row(
         modifier = modifier
             .height(IntrinsicSize.Min)
     ) {
-        Box(
-            modifier = Modifier
-                .weight(protein.toFloat())
-                .fillMaxHeight()
-                .background(proteinColor, RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp))
-        )
-        Box(
-            modifier = Modifier
-                .weight(fat.toFloat())
-                .fillMaxHeight()
-                .background(fatColor)
-        )
-        Box(
-            modifier = Modifier
-                .weight(carbs.toFloat())
-                .fillMaxHeight()
-                .background(carbsColor, RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp))
-        )
+        segments.forEachIndexed { index, (value, color) ->
+            val shape = if (segments.size == 1) {
+                RoundedCornerShape(4.dp)
+            } else when (index) {
+                0 -> RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)
+                segments.lastIndex -> RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp)
+                else -> RoundedCornerShape(0.dp)
+            }
+            Box(
+                modifier = Modifier
+                    .weight(value.toFloat())
+                    .fillMaxHeight()
+                    .background(color, shape)
+            )
+        }
     }
 }
