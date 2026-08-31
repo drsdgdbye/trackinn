@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -25,23 +28,27 @@ class CalorieViewModel(
     val approachingGoalColor = settingsRepository.approachingGoalColor
     val exceedingGoalColor = settingsRepository.exceedingGoalColor
 
-    private val today: Long = MealRepository.startOfDay(System.currentTimeMillis())
+    private val _today = MutableStateFlow(MealRepository.startOfDay(System.currentTimeMillis()))
+    val today: StateFlow<Long> = _today
 
-    val meals: StateFlow<List<MealWithItems>> = combine(
-        mealRepository.getMealsByDate(today),
-        mealRepository.getItemsByDate(today)
-    ) { mealEntities, items ->
-        mealEntities.map { meal ->
-            MealWithItems(
-                meal = meal,
-                items = items.filter { it.mealId == meal.id }
-            )
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val meals: StateFlow<List<MealWithItems>> = _today.flatMapLatest { day ->
+        combine(
+            mealRepository.getMealsByDate(day),
+            mealRepository.getItemsByDate(day)
+        ) { mealEntities, items ->
+            mealEntities.map { meal ->
+                MealWithItems(
+                    meal = meal,
+                    items = items.filter { it.mealId == meal.id }
+                )
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun addItemToMeal(mealType: String, name: String, weight: Int, calories: Int, productId: Long? = null, compositeDishId: Long? = null) {
         viewModelScope.launch {
-            val mealId = mealRepository.getOrCreateMeal(today, mealType)
+            val mealId = mealRepository.getOrCreateMeal(_today.value, mealType)
             mealRepository.addItem(
                 mealId,
                 MealItemEntity(
@@ -81,6 +88,10 @@ class CalorieViewModel(
         viewModelScope.launch {
             mealRepository.deleteItem(itemId)
         }
+    }
+
+    fun refreshToday() {
+        _today.value = MealRepository.startOfDay(System.currentTimeMillis())
     }
 
     companion object {
