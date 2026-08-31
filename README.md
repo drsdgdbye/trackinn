@@ -87,26 +87,36 @@ The app provides a palette of 20 Material Design colors that can be assigned to 
 
 ### Todo
 
-![Screenshot_20260831-141828.png](screenshots/Screenshot_20260831-141828.png)
+<p align="center">
+  <img src="screenshots/Screenshot_20260831-141828.png" width="400" />
+</p>
 
 ### Calorie tracker
 
-![Screenshot_20260831-142019.png](screenshots/Screenshot_20260831-142019.png)
-![Screenshot_20260831-142357.png](screenshots/Screenshot_20260831-142357.png)
+<p align="center">
+  <img src="screenshots/Screenshot_20260831-142019.png" width="400" />
+  <img src="screenshots/Screenshot_20260831-142357.png" width="400" />
+</p>
 
 ### Weight tracking
 
-![Screenshot_20260831-142201.png](screenshots/Screenshot_20260831-142201.png)
-![Screenshot_20260831-142423.png](screenshots/Screenshot_20260831-142423.png)
+<p align="center">
+  <img src="screenshots/Screenshot_20260831-142201.png" width="400" />
+  <img src="screenshots/Screenshot_20260831-142423.png" width="400" />
+</p>
 
 ### Meditation timer
 
-![Screenshot_20260831-142057.png](screenshots/Screenshot_20260831-142057.png)
+<p align="center">
+  <img src="screenshots/Screenshot_20260831-142057.png" width="400" />
+</p>
 
 ### Settings
 
-![Screenshot_20260831-142249.png](screenshots/Screenshot_20260831-142249.png)
-![Screenshot_20260831-142328.png](screenshots/Screenshot_20260831-142328.png)
+<p align="center">
+  <img src="screenshots/Screenshot_20260831-142249.png" width="400" />
+  <img src="screenshots/Screenshot_20260831-142328.png" width="400" />
+</p>
 
 ## Tech stack
 
